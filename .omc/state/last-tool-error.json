@@ -1,7 +1,0 @@
-{
-  "tool_name": "PowerShell",
-  "tool_input_preview": "{\"command\":\"cd \\\"C:\\\\Users\\\\wongn\\\\Desktop\\\\repos\\\\flight-wall\\\" && git init && git add . && git commit -m \\\"Initial commit: Flight Wall v1\\\"\",\"description\":\"Init git repo and initial commit\"}",
-  "error": "Exit code 128\nInitialized empty Git repository in C:/Users/wongn/Desktop/repos/flight-wall/.git/\nwarning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of '.omc/state/sessions/8648e07e-7bb2-4b85-8779-11023fe3faf3/hud-state.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'f...",
-  "timestamp": "2026-05-07T02:05:06.789Z",
-  "retry_count": 1
-}
