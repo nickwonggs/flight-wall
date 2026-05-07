@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flight Wall</title>
+<style>
+:root {
+  --bg: #0a0e1a;
+  --fg: #e8eef9;
+  --accent: #4ea1ff;
+  --muted: #7a8499;
+  --card: #131a2b;
+  --border: #1e2640;
+  --warn: #f0b429;
+  --danger: #e53e3e;
+  --stale: #2a3050;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+#topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: rgba(19, 26, 43, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+#title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--fg);
+}
+#gear-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--fg);
+  font-size: 1.1rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+#gear-btn:hover {
+  background: var(--card);
+  border-color: var(--accent);
+}
+#grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  padding: 18px;
+  align-content: start;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transform-origin: center;
+  transition: opacity 0.4s ease, background 0.3s ease, box-shadow 0.6s ease;
+  position: relative;
+  overflow: hidden;
+}
+.card .row1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.card .callsign {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+.card .flag {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+.card .row2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.card .airline {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card .icao {
+  font-family: 'Cascadia Mono', 'Consolas', 'Courier New', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+.card .divider {
+  height: 1px;
+  background: var(--border);
+  margin: 2px 0;
+}
+.card .stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 14px;
+}
+.card .stat {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.card .stat-label {
+  font-size: 0.65rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.card .stat-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+.card .last-contact {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.card .last-contact.stale-time {
+  color: var(--warn);
+}
+@keyframes cardEnter {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes cardExit {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.92); }
+}
+@keyframes cardGlow {
+  0% { box-shadow: 0 0 0 0 rgba(78, 161, 255, 0); }
+  30% { box-shadow: 0 0 18px 2px rgba(78, 161, 255, 0.45); }
+  100% { box-shadow: 0 0 0 0 rgba(78, 161, 255, 0); }
+}
+.card.enter { animation: cardEnter 0.5s ease forwards; }
+.card.exit { animation: cardExit 0.4s ease forwards; }
+.card.glow { animation: cardGlow 1s ease; }
+.card.stale {
+  opacity: 0.45;
+  background: var(--stale);
+}
+#statusbar {
+  padding: 10px 20px;
+  border-top: 1px solid var(--border);
+  background: rgba(19, 26, 43, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  align-items: center;
+  position: sticky;
+  bottom: 0;
+}
+#statusbar.warn { color: var(--warn); }
+#statusbar.danger { color: var(--danger); }
+.empty-state {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  gap: 12px;
+}
+.empty-icon {
+  font-size: 4rem;
+  opacity: 0.5;
+}
+.empty-state p { color: var(--fg); font-size: 1.05rem; }
+.empty-state p.muted { color: var(--muted); font-size: 0.85rem; }
+#config-dialog {
+  background: var(--card);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  min-width: 320px;
+  max-width: 90vw;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+}
+#config-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+#config-dialog h2 {
+  font-size: 1.1rem;
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+#config-dialog form { display: flex; flex-direction: column; gap: 10px; }
+#config-dialog label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+#config-dialog input {
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 7px 10px;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+#config-dialog input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+#config-dialog .actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+#config-dialog button {
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 7px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+#config-dialog button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #07101f;
+  font-weight: 600;
+}
+#config-dialog button:hover { border-color: var(--accent); }
+#config-dialog .hint {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+@media (max-width: 480px) {
+  #grid { grid-template-columns: 1fr; padding: 12px; gap: 10px; }
+  #statusbar { font-size: 0.72rem; }
+}
+</style>
+</head>
+<body>
+<header id="topbar">
+  <div id="title">&#9992; Flight Wall</div>
+  <button id="gear-btn" title="Settings" aria-label="Settings">&#9881;</button>
+</header>
+<main id="grid"></main>
+<footer id="statusbar">Initializing...</footer>
+<dialog id="config-dialog">
+  <h2>Settings</h2>
+  <form id="config-form" method="dialog">
+    <label>Radius (km)
+      <input type="number" name="radiusKm" min="5" max="500" step="1" required>
+    </label>
+    <label>Max cards
+      <input type="number" name="maxCards" min="1" max="50" step="1" required>
+    </label>
+    <label>Poll interval — anonymous (seconds)
+      <input type="number" name="pollAnonSec" min="10" max="600" step="1" required>
+    </label>
+    <label>Poll interval — authenticated (seconds)
+      <input type="number" name="pollAuthSec" min="5" max="600" step="1" required>
+    </label>
+    <label>OpenSky username
+      <input type="text" name="openskyUser" autocomplete="off" spellcheck="false">
+    </label>
+    <label>OpenSky password
+      <input type="password" name="openskyPass" autocomplete="off">
+    </label>
+    <p class="hint">Free account at opensky-network.org raises the rate limit. Credentials stored in localStorage on this device only.</p>
+    <div class="actions">
+      <button type="button" id="cfg-cancel">Cancel</button>
+      <button type="submit" class="primary" id="cfg-save">Save</button>
+    </div>
+  </form>
+</dialog>
+<noscript>JavaScript required.</noscript>
+<script>
+"use strict";
+
+// USER CONFIG ---------------------------------------------------------------
+// To raise rate limits, create a free account at opensky-network.org
+// then enter your credentials below (or via the gear icon settings dialog):
+const OPENSKY_AUTH = { user: "", pass: "" };
+// ---------------------------------------------------------------------------
+
+const FALLBACK_LOCATION = { lat: 1.3521, lon: 103.8198 }; // Singapore
+
+const DEFAULT_CONFIG = {
+  radiusKm: 50,
+  maxCards: 8,
+  fallbackLat: FALLBACK_LOCATION.lat,
+  fallbackLon: FALLBACK_LOCATION.lon,
+  pollAnonMs: 30000,
+  pollAuthMs: 20000,
+  openskyUser: "",
+  openskyPass: ""
+};
+
+const AIRLINES = {
+  SIA: "Singapore Airlines",
+  SQC: "Singapore Airlines Cargo",
+  AAL: "American Airlines",
+  UAL: "United Airlines",
+  DAL: "Delta Air Lines",
+  BAW: "British Airways",
+  AFR: "Air France",
+  DLH: "Lufthansa",
+  KLM: "KLM",
+  UAE: "Emirates",
+  QTR: "Qatar Airways",
+  ETD: "Etihad Airways",
+  CPA: "Cathay Pacific",
+  ANA: "All Nippon Airways",
+  JAL: "Japan Airlines",
+  KAL: "Korean Air",
+  AAR: "Asiana Airlines",
+  CCA: "Air China",
+  CES: "China Eastern",
+  CSN: "China Southern",
+  THY: "Turkish Airlines",
+  QFA: "Qantas",
+  ANZ: "Air New Zealand",
+  VIR: "Virgin Atlantic",
+  VOZ: "Virgin Australia",
+  RYR: "Ryanair",
+  EZY: "easyJet",
+  WJA: "WestJet",
+  ACA: "Air Canada",
+  SWA: "Southwest",
+  JBU: "JetBlue",
+  ASA: "Alaska Airlines",
+  FFT: "Frontier",
+  NKS: "Spirit Airlines",
+  HAL: "Hawaiian Airlines",
+  FDX: "FedEx Express",
+  UPS: "UPS Airlines",
+  GTI: "Atlas Air",
+  MAS: "Malaysia Airlines",
+  AXM: "AirAsia",
+  TGW: "Scoot",
+  JSA: "Jetstar Asia",
+  PAL: "Philippine Airlines",
+  CEB: "Cebu Pacific",
+  GIA: "Garuda Indonesia",
+  THA: "Thai Airways",
+  VJC: "VietJet Air",
+  HVN: "Vietnam Airlines",
+  AIC: "Air India",
+  IGO: "IndiGo",
+  PIA: "Pakistan Intl Airlines",
+  SVA: "Saudia",
+  MEA: "Middle East Airlines",
+  ELY: "El Al",
+  EIN: "Aer Lingus",
+  FIN: "Finnair",
+  SAS: "Scandinavian Airlines",
+  AUA: "Austrian Airlines",
+  SWR: "SWISS",
+  IBE: "Iberia",
+  TAP: "TAP Air Portugal",
+  AEE: "Aegean Airlines",
+  PGT: "Pegasus Airlines",
+  AFL: "Aeroflot",
+  ETH: "Ethiopian Airlines",
+  MSR: "EgyptAir",
+  RAM: "Royal Air Maroc",
+  SAA: "South African Airways",
+  AMX: "Aeromexico",
+  AVA: "Avianca",
+  LAN: "LATAM",
+  GLO: "GOL",
+  AZU: "Azul",
+  CFG: "Condor",
+  TUI: "TUI Airways",
+  WZZ: "Wizz Air",
+  VLG: "Vueling",
+  NAX: "Norwegian",
+  BEL: "Brussels Airlines",
+  KLC: "KLM Cityhopper",
+  TOM: "TUI Airways",
+  CLX: "Cargolux",
+  EVA: "EVA Air",
+  CAL: "China Airlines",
+  HKE: "Hong Kong Express",
+  MXD: "Maxsus-Avia",
+  BTI: "Air Baltic",
+  LOT: "LOT Polish Airlines",
+  CSA: "Czech Airlines",
+  ROT: "TAROM",
+  MAU: "Air Mauritius",
+  ETD2: "Etihad",
+  RJA: "Royal Jordanian",
+  GFA: "Gulf Air",
+  KAC: "Kuwait Airways",
+  OMA: "Oman Air",
+  THT: "Air Tahiti Nui",
+  FJI: "Fiji Airways",
+  NCA: "Nippon Cargo",
+  SQA: "Singapore Asia",
+  EDW: "Edelweiss",
+  BER: "Air Berlin"
+};
+
+const COUNTRY_FLAGS = {
+  "Singapore": "🇸🇬",
+  "United States": "🇺🇸",
+  "United Kingdom": "🇬🇧",
+  "Germany": "🇩🇪",
+  "France": "🇫🇷",
+  "Japan": "🇯🇵",
+  "China": "🇨🇳",
+  "India": "🇮🇳",
+  "Australia": "🇦🇺",
+  "Canada": "🇨🇦",
+  "Netherlands": "🇳🇱",
+  "United Arab Emirates": "🇦🇪",
+  "Qatar": "🇶🇦",
+  "Hong Kong": "🇭🇰",
+  "Korea": "🇰🇷",
+  "Republic of Korea": "🇰🇷",
+  "South Korea": "🇰🇷",
+  "Malaysia": "🇲🇾",
+  "Indonesia": "🇮🇩",
+  "Thailand": "🇹🇭",
+  "Viet Nam": "🇻🇳",
+  "Vietnam": "🇻🇳",
+  "Philippines": "🇵🇭",
+  "Turkey": "🇹🇷",
+  "Saudi Arabia": "🇸🇦",
+  "Israel": "🇮🇱",
+  "Ireland": "🇮🇪",
+  "Finland": "🇫🇮",
+  "Sweden": "🇸🇪",
+  "Norway": "🇳🇴",
+  "Denmark": "🇩🇰",
+  "Switzerland": "🇨🇭",
+  "Austria": "🇦🇹",
+  "Belgium": "🇧🇪",
+  "Spain": "🇪🇸",
+  "Portugal": "🇵🇹",
+  "Italy": "🇮🇹",
+  "Greece": "🇬🇷",
+  "Russia": "🇷🇺",
+  "Russian Federation": "🇷🇺",
+  "Ethiopia": "🇪🇹",
+  "Egypt": "🇪🇬",
+  "Morocco": "🇲🇦",
+  "South Africa": "🇿🇦",
+  "Kenya": "🇰🇪",
+  "Brazil": "🇧🇷",
+  "Mexico": "🇲🇽",
+  "Argentina": "🇦🇷",
+  "Colombia": "🇨🇴",
+  "New Zealand": "🇳🇿",
+  "Pakistan": "🇵🇰"
+};
+
+const state = {
+  userLat: null,
+  userLon: null,
+  flights: new Map(), // icao24 -> {data, el, fetchedAt}
+  pollTimer: null,
+  tickTimer: null,
+  backoffMs: 0,
+  requestsToday: 0,
+  lastFetch: 0,
+  polling: false,
+  config: { ...DEFAULT_CONFIG }
+};
+
+// MATH ----------------------------------------------------------------------
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const toRad = (d) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+
+function bbox(lat, lon, radiusKm) {
+  const dLat = radiusKm / 111.0;
+  const dLon = radiusKm / (111.0 * Math.cos((lat * Math.PI) / 180) || 0.00001);
+  return {
+    lamin: lat - dLat,
+    lomin: lon - dLon,
+    lamax: lat + dLat,
+    lomax: lon + dLon
+  };
+}
+
+function compass(deg) {
+  if (deg == null || isNaN(deg)) return "";
+  const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+  const idx = ((Math.round(((deg % 360) + 360) / 45)) % 8);
+  return dirs[idx];
+}
+
+function metersToFeet(m) { return m * 3.28084; }
+function mpsToKnots(mps) { return mps * 1.94384; }
+
+function interpolatePosition(lat, lon, velMps, trackDeg, elapsedSec) {
+  if (velMps == null || trackDeg == null || !elapsedSec) return { lat, lon };
+  const distM = velMps * elapsedSec;
+  const trackRad = (trackDeg * Math.PI) / 180;
+  // flat-earth approximation
+  const dN = distM * Math.cos(trackRad); // meters north
+  const dE = distM * Math.sin(trackRad); // meters east
+  const dLat = dN / 111000;
+  const dLon = dE / (111000 * Math.cos((lat * Math.PI) / 180) || 0.00001);
+  return { lat: lat + dLat, lon: lon + dLon };
+}
+
+// HELPERS -------------------------------------------------------------------
+function airlineFromCallsign(cs) {
+  if (!cs) return null;
+  const prefix = cs.trim().substring(0, 3).toUpperCase();
+  return AIRLINES[prefix] || null;
+}
+
+function flagEmoji(country) {
+  if (!country) return "🏳️"; // white flag
+  return COUNTRY_FLAGS[country] || "🏳️";
+}
+
+function relativeTime(unixSec) {
+  if (!unixSec) return "—";
+  const diff = Math.max(0, Math.floor(Date.now() / 1000 - unixSec));
+  if (diff < 3) return "just now";
+  if (diff < 60) return diff + "s ago";
+  if (diff < 3600) return Math.floor(diff / 60) + "m ago";
+  return Math.floor(diff / 3600) + "h ago";
+}
+
+function fmtTime(unixMs) {
+  const d = new Date(unixMs);
+  const pad = (n) => n.toString().padStart(2, "0");
+  return pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+}
+
+// CONFIG --------------------------------------------------------------------
+function loadConfig() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("fw.config") || "{}");
+    return { ...DEFAULT_CONFIG, ...stored };
+  } catch (e) {
+    return { ...DEFAULT_CONFIG };
+  }
+}
+
+function saveConfig(cfg) {
+  try {
+    localStorage.setItem("fw.config", JSON.stringify(cfg));
+  } catch (e) {}
+  state.config = { ...DEFAULT_CONFIG, ...cfg };
+}
+
+function getActiveAuth() {
+  const cfg = state.config;
+  const user = OPENSKY_AUTH.user || cfg.openskyUser || "";
+  const pass = OPENSKY_AUTH.pass || cfg.openskyPass || "";
+  return { user, pass };
+}
+
+// LOCATION ------------------------------------------------------------------
+async function acquireLocation() {
+  return new Promise((resolve) => {
+    const fallback = () => {
+      const cached = JSON.parse(localStorage.getItem("fw.location") || "null");
+      if (cached && typeof cached.lat === "number") {
+        state.userLat = cached.lat;
+        state.userLon = cached.lon;
+      } else {
+        state.userLat = state.config.fallbackLat;
+        state.userLon = state.config.fallbackLon;
+      }
+      resolve();
+    };
+    if (!navigator.geolocation) { fallback(); return; }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        state.userLat = pos.coords.latitude;
+        state.userLon = pos.coords.longitude;
+        try {
+          localStorage.setItem("fw.location", JSON.stringify({ lat: state.userLat, lon: state.userLon }));
+        } catch (e) {}
+        resolve();
+      },
+      () => { fallback(); },
+      { enableHighAccuracy: false, timeout: 6000, maximumAge: 600000 }
+    );
+  });
+}
+
+// QUOTA ---------------------------------------------------------------------
+function trackQuota() {
+  const today = new Date().toISOString().slice(0, 10);
+  let stored;
+  try {
+    stored = JSON.parse(localStorage.getItem("fw.quota") || "{}");
+  } catch (e) { stored = {}; }
+  if (stored.day !== today) stored = { day: today, count: 0 };
+  stored.count++;
+  try { localStorage.setItem("fw.quota", JSON.stringify(stored)); } catch (e) {}
+  state.requestsToday = stored.count;
+  const auth = getActiveAuth();
+  return { count: stored.count, cap: auth.user ? 4000 : 400 };
+}
+
+function getQuotaSnapshot() {
+  const today = new Date().toISOString().slice(0, 10);
+  let stored;
+  try { stored = JSON.parse(localStorage.getItem("fw.quota") || "{}"); }
+  catch (e) { stored = {}; }
+  if (stored.day !== today) stored = { day: today, count: 0 };
+  const auth = getActiveAuth();
+  return { count: stored.count || 0, cap: auth.user ? 4000 : 400 };
+}
+
+// API -----------------------------------------------------------------------
+async function fetchStates() {
+  const cfg = state.config;
+  const lat = state.userLat ?? cfg.fallbackLat;
+  const lon = state.userLon ?? cfg.fallbackLon;
+  const box = bbox(lat, lon, cfg.radiusKm);
+  const url = "https://opensky-network.org/api/states/all"
+    + "?lamin=" + box.lamin.toFixed(4)
+    + "&lomin=" + box.lomin.toFixed(4)
+    + "&lamax=" + box.lamax.toFixed(4)
+    + "&lomax=" + box.lomax.toFixed(4);
+  const headers = {};
+  const auth = getActiveAuth();
+  if (auth.user) {
+    headers["Authorization"] = "Basic " + btoa(auth.user + ":" + auth.pass);
+  }
+  trackQuota();
+  state.lastFetch = Date.now();
+  console.log("[FlightWall] Fetching", url, "| auth:", auth.user ? "user=" + auth.user : "anonymous");
+  let resp;
+  try {
+    resp = await fetch(url, { headers });
+  } catch (e) {
+    state.backoffMs = Math.min(120000, Math.max(15000, state.backoffMs * 2 || 15000));
+    throw new Error("Network error: " + e.message);
+  }
+  console.log("[FlightWall] Response status:", resp.status);
+  if (resp.status === 429) {
+    state.backoffMs = Math.min(300000, Math.max(60000, state.backoffMs * 2 || 60000));
+    throw new Error("Rate limited (429)");
+  }
+  if (!resp.ok) {
+    state.backoffMs = Math.min(120000, Math.max(20000, state.backoffMs * 2 || 20000));
+    throw new Error("HTTP " + resp.status);
+  }
+  state.backoffMs = 0;
+  const json = await resp.json();
+  return json && json.states ? json.states : [];
+}
+
+// PROCESSING ----------------------------------------------------------------
+function processStates(rawStates) {
+  const cfg = state.config;
+  const lat = state.userLat ?? cfg.fallbackLat;
+  const lon = state.userLon ?? cfg.fallbackLon;
+  const result = [];
+  for (const s of rawStates) {
+    if (!s) continue;
+    if (s[8] === true) continue; // on_ground
+    const sLat = s[6];
+    const sLon = s[5];
+    if (sLat == null || sLon == null) continue;
+    const distKm = haversineKm(lat, lon, sLat, sLon);
+    if (distKm > cfg.radiusKm) continue;
+    result.push({
+      icao24: (s[0] || "").trim(),
+      callsign: (s[1] || "").trim(),
+      country: s[2] || "",
+      time_position: s[3],
+      last_contact: s[4],
+      lon: sLon,
+      lat: sLat,
+      baro_altitude: s[7],
+      on_ground: s[8],
+      velocity: s[9],
+      true_track: s[10],
+      vertical_rate: s[11],
+      geo_altitude: s[13],
+      squawk: s[14],
+      distanceKm: distKm,
+      fetchedAt: Date.now()
+    });
+  }
+  result.sort((a, b) => a.distanceKm - b.distanceKm);
+  return result.slice(0, cfg.maxCards);
+}
+
+// RENDERING -----------------------------------------------------------------
+function buildCard(f) {
+  const el = document.createElement("div");
+  el.className = "card enter";
+  el.dataset.icao = f.icao24;
+  el.innerHTML = ''
+    + '<div class="row1">'
+    +   '<span class="callsign"></span>'
+    +   '<span class="flag"></span>'
+    + '</div>'
+    + '<div class="row2">'
+    +   '<span class="airline"></span>'
+    +   '<span class="icao"></span>'
+    + '</div>'
+    + '<div class="divider"></div>'
+    + '<div class="stats">'
+    +   '<div class="stat"><span class="stat-label">Altitude</span><span class="stat-value alt"></span></div>'
+    +   '<div class="stat"><span class="stat-label">Speed</span><span class="stat-value spd"></span></div>'
+    +   '<div class="stat"><span class="stat-label">Distance</span><span class="stat-value dst"></span></div>'
+    +   '<div class="stat"><span class="stat-label">Heading</span><span class="stat-value hdg"></span></div>'
+    + '</div>'
+    + '<div class="last-contact"></div>';
+  setTimeout(() => el.classList.remove("enter"), 600);
+  return el;
+}
+
+function updateCard(el, f, glow) {
+  const callsign = f.callsign || f.icao24 || "—";
+  el.querySelector(".callsign").textContent = callsign;
+  el.querySelector(".flag").textContent = flagEmoji(f.country);
+  const airline = airlineFromCallsign(f.callsign) || f.country || "—";
+  el.querySelector(".airline").textContent = airline;
+  el.querySelector(".icao").textContent = (f.icao24 || "—").toUpperCase();
+  const altM = f.geo_altitude ?? f.baro_altitude;
+  const altTxt = altM != null ? Math.round(metersToFeet(altM)).toLocaleString() + " ft" : "—";
+  el.querySelector(".alt").textContent = altTxt;
+  const spdTxt = f.velocity != null ? Math.round(mpsToKnots(f.velocity)) + " kts" : "—";
+  el.querySelector(".spd").textContent = spdTxt;
+  el.querySelector(".dst").textContent = f.distanceKm != null ? f.distanceKm.toFixed(1) + " km" : "—";
+  const hdgTxt = f.true_track != null
+    ? Math.round(f.true_track) + "° " + compass(f.true_track)
+    : "—";
+  el.querySelector(".hdg").textContent = hdgTxt;
+  const lc = el.querySelector(".last-contact");
+  lc.textContent = "Last contact: " + relativeTime(f.last_contact);
+  const ageSec = f.last_contact ? (Date.now() / 1000 - f.last_contact) : 0;
+  if (ageSec > 60) {
+    el.classList.add("stale");
+    lc.classList.add("stale-time");
+  } else {
+    el.classList.remove("stale");
+    lc.classList.remove("stale-time");
+  }
+  if (glow) {
+    el.classList.remove("glow");
+    void el.offsetWidth; // reflow
+    el.classList.add("glow");
+    setTimeout(() => el.classList.remove("glow"), 1100);
+  }
+}
+
+function renderEmptyState() {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  const cfg = state.config;
+  const auth = getActiveAuth();
+  const intervalSec = Math.round((auth.user ? cfg.pollAuthMs : cfg.pollAnonMs) / 1000);
+  const wrap = document.createElement("div");
+  wrap.className = "empty-state";
+  wrap.innerHTML = ''
+    + '<span class="empty-icon">🛫</span>'
+    + '<p>No flights within ' + cfg.radiusKm + 'km</p>'
+    + '<p class="muted">Radius: ' + cfg.radiusKm + 'km · Polling every ' + intervalSec + 's</p>';
+  grid.appendChild(wrap);
+  state.flights.clear();
+}
+
+function renderFlights(flights) {
+  const grid = document.getElementById("grid");
+  if (!flights || flights.length === 0) {
+    renderEmptyState();
+    document.title = "✈ Flight Wall";
+    return;
+  }
+  // remove empty-state if present
+  const empty = grid.querySelector(".empty-state");
+  if (empty) { empty.remove(); }
+  const seen = new Set();
+  for (const f of flights) {
+    if (!f.icao24) continue;
+    seen.add(f.icao24);
+    const existing = state.flights.get(f.icao24);
+    if (existing) {
+      updateCard(existing.el, f, true);
+      existing.data = f;
+      existing.fetchedAt = f.fetchedAt;
+    } else {
+      const el = buildCard(f);
+      updateCard(el, f, false);
+      grid.appendChild(el);
+      state.flights.set(f.icao24, { data: f, el: el, fetchedAt: f.fetchedAt });
+    }
+  }
+  // remove gone flights — delete from Map only after exit animation to prevent duplicate-card race
+  for (const [icao, entry] of Array.from(state.flights.entries())) {
+    if (!seen.has(icao)) {
+      state.flights.delete(icao);
+      entry.el.classList.add("exit");
+      setTimeout(() => { if (entry.el.parentNode) entry.el.parentNode.removeChild(entry.el); }, 450);
+    }
+  }
+  // reorder cards by distance
+  flights.forEach((f, i) => {
+    const entry = state.flights.get(f.icao24);
+    if (!entry) return;
+    if (grid.children[i] !== entry.el) {
+      grid.insertBefore(entry.el, grid.children[i] || null);
+    }
+  });
+  const nearest = flights[0];
+  document.title = "✈ " + (nearest.callsign || "Flight Wall") + " • Flight Wall";
+}
+
+function updateStatus(msg, severity) {
+  const sb = document.getElementById("statusbar");
+  if (msg) {
+    sb.textContent = msg;
+    sb.classList.remove("warn", "danger");
+    if (severity === "danger") sb.classList.add("danger");
+    else if (severity === "warn") sb.classList.add("warn");
+    return;
+  }
+  const cfg = state.config;
+  const q = getQuotaSnapshot();
+  const lat = state.userLat ?? cfg.fallbackLat;
+  const lon = state.userLon ?? cfg.fallbackLon;
+  const lastTxt = state.lastFetch ? fmtTime(state.lastFetch) : "—";
+  const auth = getActiveAuth();
+  const authTxt = auth.user ? "🔑 " + auth.user : "👤 anon";
+  const parts = [
+    "✈ " + state.flights.size + " flights",
+    "📍 " + lat.toFixed(3) + "," + lon.toFixed(3),
+    "⏱ Last: " + lastTxt,
+    "📶 " + q.count + "/" + q.cap + " req today",
+    cfg.radiusKm + "km radius",
+    authTxt
+  ];
+  sb.textContent = parts.join("  |  ");
+  sb.classList.remove("warn", "danger");
+  const ratio = q.count / q.cap;
+  if (ratio > 0.95) sb.classList.add("danger");
+  else if (ratio > 0.8) sb.classList.add("warn");
+}
+
+// TICK / POLL ---------------------------------------------------------------
+function interpolateTick() {
+  const lat = state.userLat ?? state.config.fallbackLat;
+  const lon = state.userLon ?? state.config.fallbackLon;
+  for (const entry of state.flights.values()) {
+    const f = entry.data;
+    if (!f) continue;
+    const elapsedSec = (Date.now() - entry.fetchedAt) / 1000;
+    const pos = interpolatePosition(f.lat, f.lon, f.velocity, f.true_track, elapsedSec);
+    const dist = haversineKm(lat, lon, pos.lat, pos.lon);
+    const distEl = entry.el.querySelector(".dst");
+    if (distEl) distEl.textContent = dist.toFixed(1) + " km";
+    const lc = entry.el.querySelector(".last-contact");
+    if (lc) {
+      lc.textContent = "Last contact: " + relativeTime(f.last_contact);
+      const ageSec = f.last_contact ? (Date.now() / 1000 - f.last_contact) : 0;
+      if (ageSec > 60) {
+        entry.el.classList.add("stale");
+        lc.classList.add("stale-time");
+      } else {
+        entry.el.classList.remove("stale");
+        lc.classList.remove("stale-time");
+      }
+    }
+  }
+  updateStatus();
+}
+
+async function pollOnce() {
+  try {
+    updateStatus("Fetching flights...");
+    const raw = await fetchStates();
+    console.log("[FlightWall] API returned", raw.length, "states");
+    const flights = processStates(raw);
+    console.log("[FlightWall] After filter:", flights.length, "flights in radius");
+    renderFlights(flights);
+    updateStatus();
+  } catch (e) {
+    console.error("[FlightWall] Poll error:", e);
+    updateStatus("Error: " + e.message + (state.backoffMs ? " (backoff " + Math.round(state.backoffMs / 1000) + "s)" : ""), "danger");
+  }
+}
+
+async function pollLoop() {
+  if (!state.polling) return;
+  await pollOnce();
+  if (!state.polling) return;
+  const cfg = state.config;
+  const auth = getActiveAuth();
+  const interval = state.backoffMs || (auth.user ? cfg.pollAuthMs : cfg.pollAnonMs);
+  state.pollTimer = setTimeout(pollLoop, interval);
+}
+
+function startPolling() {
+  if (state.polling) return;
+  state.polling = true;
+  pollLoop();
+  if (!state.tickTimer) {
+    state.tickTimer = setInterval(interpolateTick, 1000);
+  }
+}
+
+function stopPolling() {
+  state.polling = false;
+  if (state.pollTimer) { clearTimeout(state.pollTimer); state.pollTimer = null; }
+  if (state.tickTimer) { clearInterval(state.tickTimer); state.tickTimer = null; }
+}
+
+// CONFIG DIALOG -------------------------------------------------------------
+function openConfigDialog() {
+  const dlg = document.getElementById("config-dialog");
+  const form = document.getElementById("config-form");
+  const cfg = state.config;
+  form.elements.radiusKm.value = cfg.radiusKm;
+  form.elements.maxCards.value = cfg.maxCards;
+  form.elements.pollAnonSec.value = Math.round(cfg.pollAnonMs / 1000);
+  form.elements.pollAuthSec.value = Math.round(cfg.pollAuthMs / 1000);
+  form.elements.openskyUser.value = cfg.openskyUser || "";
+  form.elements.openskyPass.value = cfg.openskyPass || "";
+  if (typeof dlg.showModal === "function") dlg.showModal();
+  else dlg.setAttribute("open", "");
+}
+
+function closeConfigDialog() {
+  const dlg = document.getElementById("config-dialog");
+  if (typeof dlg.close === "function") dlg.close();
+  else dlg.removeAttribute("open");
+}
+
+function wireConfigDialog() {
+  const form = document.getElementById("config-form");
+  document.getElementById("gear-btn").addEventListener("click", openConfigDialog);
+  document.getElementById("cfg-cancel").addEventListener("click", (ev) => {
+    ev.preventDefault();
+    closeConfigDialog();
+  });
+  form.addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const fd = new FormData(form);
+    const next = {
+      ...state.config,
+      radiusKm: Math.max(5, Math.min(500, Number(fd.get("radiusKm")) || DEFAULT_CONFIG.radiusKm)),
+      maxCards: Math.max(1, Math.min(50, Number(fd.get("maxCards")) || DEFAULT_CONFIG.maxCards)),
+      pollAnonMs: Math.max(10, Math.min(600, Number(fd.get("pollAnonSec")) || 30)) * 1000,
+      pollAuthMs: Math.max(5, Math.min(600, Number(fd.get("pollAuthSec")) || 20)) * 1000,
+      openskyUser: String(fd.get("openskyUser") || "").trim(),
+      openskyPass: String(fd.get("openskyPass") || "")
+    };
+    saveConfig(next);
+    closeConfigDialog();
+    stopPolling();
+    startPolling();
+    updateStatus();
+  });
+}
+
+// BOOT ----------------------------------------------------------------------
+async function main() {
+  state.config = loadConfig();
+  wireConfigDialog();
+  updateStatus("Acquiring location...");
+  await acquireLocation();
+  updateStatus("Starting...");
+  startPolling();
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      stopPolling();
+      updateStatus("Paused (tab hidden)");
+    } else {
+      startPolling();
+    }
+  });
+}
+
+main();
+</script>
+</body>
+</html>
