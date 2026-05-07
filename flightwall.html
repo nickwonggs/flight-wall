@@ -6,22 +6,37 @@
 <title>Flight Wall</title>
 <style>
 :root {
-  --bg: #0a0e1a;
-  --fg: #e8eef9;
-  --accent: #4ea1ff;
-  --muted: #7a8499;
-  --card: #131a2b;
-  --border: #1e2640;
-  --warn: #f0b429;
-  --danger: #e53e3e;
-  --stale: #2a3050;
+  --bg-0:        #07090d;
+  --bg-1:        #0c0f15;
+  --bg:          #07090d;
+  --fg:          rgba(255, 255, 255, 0.96);
+  --fg-2:        rgba(235, 240, 250, 0.66);
+  --fg-3:        rgba(220, 230, 245, 0.42);
+  --fg-4:        rgba(200, 215, 235, 0.28);
+  --accent:      oklch(78% 0.12 230);
+  --accent-dim:  oklch(78% 0.12 230 / 0.18);
+  --muted:       rgba(220, 230, 245, 0.42);
+  --card:        rgba(22, 26, 34, 0.72);
+  --surface-hi:  rgba(36, 42, 54, 0.55);
+  --border:      rgba(255, 255, 255, 0.08);
+  --hairline:    rgba(255, 255, 255, 0.08);
+  --warn:        oklch(78% 0.12 70);
+  --danger:      #e53e3e;
+  --stale:       rgba(20, 24, 32, 0.5);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 body {
-  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: var(--bg);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background:
+    radial-gradient(1200px 800px at 20% 10%, rgba(40, 60, 100, 0.18), transparent 60%),
+    radial-gradient(1000px 700px at 80% 90%, rgba(80, 40, 110, 0.12), transparent 60%),
+    linear-gradient(180deg, var(--bg-1), var(--bg-0));
+  background-attachment: fixed;
   color: var(--fg);
+  letter-spacing: -0.01em;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -31,156 +46,375 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
-  background: rgba(19, 26, 43, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
+  padding: 14px 22px;
+  background: rgba(10, 13, 18, 0.55);
+  backdrop-filter: blur(40px) saturate(160%);
+  -webkit-backdrop-filter: blur(40px) saturate(160%);
+  border-bottom: 1px solid var(--hairline);
   position: sticky;
   top: 0;
   z-index: 10;
 }
 #title {
-  font-size: 1.15rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.01em;
   color: var(--fg);
 }
 #gear-btn {
   background: transparent;
-  border: 1px solid var(--border);
+  border: 1px solid var(--hairline);
   color: var(--fg);
   font-size: 1.1rem;
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
 #gear-btn:hover {
-  background: var(--card);
+  background: rgba(255,255,255,0.04);
   border-color: var(--accent);
 }
 #grid {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 14px;
-  padding: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(275px, 1fr));
+  gap: 12px;
+  padding: 12px;
   align-content: start;
 }
+
+/* ─────────────  C A R D  ───────────── */
 .card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 16px;
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0) 30%),
+    var(--card);
+  border-radius: 16px;
+  backdrop-filter: blur(40px) saturate(140%);
+  -webkit-backdrop-filter: blur(40px) saturate(140%);
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.08) inset,
+    0 1px 0 rgba(255,255,255,0.06) inset,
+    0 30px 60px -20px rgba(0,0,0,0.55),
+    0 12px 30px -12px rgba(0,0,0,0.45);
+  overflow: hidden;
+  isolation: isolate;
+  transition: opacity 0.4s ease, box-shadow 0.6s ease;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  transform-origin: center;
-  transition: opacity 0.4s ease, background 0.3s ease, box-shadow 0.6s ease;
+}
+
+/* Hero photo area */
+.hero {
   position: relative;
+  aspect-ratio: 16 / 8;
+  width: 100%;
   overflow: hidden;
+  background: linear-gradient(135deg, #1a2435 0%, #0f1521 100%);
+  flex-shrink: 0;
 }
-.card .row1 {
+.hero::after {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(7,9,13,0) 40%, rgba(7,9,13,0.55) 78%, rgba(7,9,13,0.85) 100%),
+    linear-gradient(90deg, rgba(7,9,13,0.3) 0%, rgba(7,9,13,0) 35%);
+  pointer-events: none;
+}
+.hero .aircraft-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+.hero .placeholder {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  color: var(--fg-4);
+  font: 500 10px/1 ui-monospace, "SF Mono", Menlo, monospace;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  background-image: repeating-linear-gradient(135deg,
+    rgba(255,255,255,0.025) 0 8px, transparent 8px 16px);
+}
+.hero .hero-chip {
+  position: absolute;
+  top: 8px; right: 8px;
+  display: flex; align-items: center;
+  z-index: 2;
+}
+.hero .flag {
+  width: 18px; height: 13px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 0.5px rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.4);
+  display: block;
+}
+.hero .hero-foot {
+  position: absolute;
+  left: 8px; bottom: 6px; right: 8px;
+  display: flex; align-items: center; gap: 6px;
+  z-index: 2;
+  color: rgba(255,255,255,0.95);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  min-width: 0;
+}
+.hero .ac-type-val {
+  font-weight: 500;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  flex: 1; min-width: 0;
+}
+.hero .photo-reg {
+  font: 500 9px/1 ui-monospace, "SF Mono", Menlo, monospace;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.12);
+  box-shadow: 0 0 0 0.5px rgba(255,255,255,0.18) inset;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+
+/* Header */
+.card .header {
+  padding: 10px 12px 6px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-}
-.card .callsign {
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  color: var(--fg);
-  font-variant-numeric: tabular-nums;
-}
-.card .flag {
-  font-size: 1.5rem;
-  line-height: 1;
-}
-.card .row2 {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.82rem;
-  color: var(--muted);
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 .card .airline {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: var(--fg-3);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.card .icao {
-  font-family: 'Cascadia Mono', 'Consolas', 'Courier New', monospace;
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
-}
-.card .divider {
-  height: 1px;
-  background: var(--border);
-  margin: 2px 0;
-}
-.card .stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 14px;
-}
-.card .stat {
+.card .callsign-row {
   display: flex;
-  flex-direction: column;
-  gap: 1px;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
-.card .stat-label {
-  font-size: 0.65rem;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+.card .header-logo {
+  height: 28px;
+  width: auto;
+  max-width: 60px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 4px;
 }
-.card .stat-value {
-  font-size: 1rem;
+.card .callsign {
+  font-size: 22px;
   font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1;
   color: var(--fg);
   font-variant-numeric: tabular-nums;
+  min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  flex: 1;
+}
+.card .icao {
+  color: var(--fg-4);
+  font: 500 9px/1 ui-monospace, "SF Mono", Menlo, monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+/* Route */
+.card .route-row {
+  display: none;
+  padding: 0 12px 8px;
+  align-items: center;
+  gap: 8px;
+  color: var(--fg);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.card .route-iata { font-variant-numeric: tabular-nums; }
+.card .route-arrow {
+  color: var(--accent);
+  flex: 1;
+  display: flex; align-items: center; gap: 6px;
+  min-width: 0;
+}
+.card .route-arrow .line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--accent-dim), var(--accent), var(--accent-dim));
+  opacity: 0.55;
+}
+
+/* Metrics */
+.card .stats {
+  margin: 0 10px 10px;
+  border-radius: 10px;
+  background: var(--surface-hi);
+  box-shadow: 0 0 0 0.5px rgba(255,255,255,0.06) inset;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative;
+}
+.card .stat {
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: relative;
+  min-width: 0;
+}
+.card .stat:nth-child(odd)::after {
+  content: "";
+  position: absolute;
+  top: 8px; bottom: 8px; right: 0;
+  width: 1px;
+  background: var(--hairline);
+}
+.card .stat:nth-child(1)::before,
+.card .stat:nth-child(2)::before {
+  content: "";
+  position: absolute;
+  left: 10px; right: 10px; bottom: 0;
+  height: 1px;
+  background: var(--hairline);
+}
+.card .stat-label {
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+.card .stat-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card .stat-value .unit {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--fg-3);
+  letter-spacing: 0;
+  margin-left: 1px;
+}
+.card .stat-value .compass {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  margin-left: 4px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: var(--accent-dim);
+}
+.card .heading-tick {
+  --rot: 0deg;
+  width: 12px; height: 12px;
+  margin-left: 4px;
+  transform: rotate(var(--rot));
+  color: var(--accent);
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* Footer */
+.card .card-footer {
+  padding: 6px 12px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.card .badges {
+  display: flex; gap: 4px;
+}
+.card .badge {
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 100px;
+  color: var(--fg-2);
+  box-shadow: 0 0 0 0.5px var(--hairline) inset;
+  background: rgba(255,255,255,0.025);
+}
+.card .badge-cargo {
+  color: oklch(82% 0.12 70);
+  box-shadow: 0 0 0 0.5px oklch(82% 0.12 70 / 0.4) inset;
+  background: oklch(82% 0.12 70 / 0.08);
+}
+.card .badge-bizjet {
+  color: oklch(78% 0.12 300);
+  box-shadow: 0 0 0 0.5px oklch(78% 0.12 300 / 0.4) inset;
+  background: oklch(78% 0.12 300 / 0.08);
 }
 .card .last-contact {
-  font-size: 0.72rem;
-  color: var(--muted);
-  margin-top: 2px;
+  color: var(--fg-3);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  display: flex; align-items: center; gap: 5px;
 }
-.card .last-contact.stale-time {
-  color: var(--warn);
+.card .last-contact .live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: oklch(78% 0.18 145);
+  box-shadow: 0 0 8px oklch(78% 0.18 145 / 0.7);
+  animation: livePulse 2.6s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.card .last-contact.stale-time { color: var(--warn); }
+.card .last-contact.stale-time .live-dot {
+  background: var(--warn);
+  box-shadow: 0 0 8px oklch(78% 0.12 70 / 0.7);
+  animation: none;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(0.85); }
 }
 @keyframes cardEnter {
-  from { opacity: 0; transform: scale(0.92); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 @keyframes cardExit {
   from { opacity: 1; transform: scale(1); }
-  to { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 0; transform: scale(0.96); }
 }
 @keyframes cardGlow {
-  0% { box-shadow: 0 0 0 0 rgba(78, 161, 255, 0); }
-  30% { box-shadow: 0 0 18px 2px rgba(78, 161, 255, 0.45); }
-  100% { box-shadow: 0 0 0 0 rgba(78, 161, 255, 0); }
+  0%   { box-shadow: 0 0 0 0.5px rgba(255,255,255,0.08) inset, 0 1px 0 rgba(255,255,255,0.06) inset, 0 30px 60px -20px rgba(0,0,0,0.55), 0 12px 30px -12px rgba(0,0,0,0.45); }
+  30%  { box-shadow: 0 0 0 0.5px oklch(78% 0.12 230 / 0.4) inset, 0 0 30px 4px oklch(78% 0.12 230 / 0.25), 0 30px 60px -20px rgba(0,0,0,0.55); }
+  100% { box-shadow: 0 0 0 0.5px rgba(255,255,255,0.08) inset, 0 1px 0 rgba(255,255,255,0.06) inset, 0 30px 60px -20px rgba(0,0,0,0.55), 0 12px 30px -12px rgba(0,0,0,0.45); }
 }
-.card.enter { animation: cardEnter 0.5s ease forwards; }
-.card.exit { animation: cardExit 0.4s ease forwards; }
-.card.glow { animation: cardGlow 1s ease; }
-.card.stale {
-  opacity: 0.45;
-  background: var(--stale);
-}
+.card.enter { animation: cardEnter 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.card.exit  { animation: cardExit 0.4s ease forwards; }
+.card.glow  { animation: cardGlow 1.1s ease; }
+.card.stale { opacity: 0.5; }
+
 #statusbar {
-  padding: 10px 20px;
-  border-top: 1px solid var(--border);
-  background: rgba(19, 26, 43, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  padding: 12px 22px;
+  border-top: 1px solid var(--hairline);
+  background: rgba(10, 13, 18, 0.55);
+  backdrop-filter: blur(40px) saturate(160%);
+  -webkit-backdrop-filter: blur(40px) saturate(160%);
   font-size: 0.78rem;
-  color: var(--muted);
+  color: var(--fg-3);
   font-variant-numeric: tabular-nums;
   display: flex;
   flex-wrap: wrap;
@@ -201,10 +435,7 @@ body {
   text-align: center;
   gap: 12px;
 }
-.empty-icon {
-  font-size: 4rem;
-  opacity: 0.5;
-}
+.empty-icon { font-size: 4rem; opacity: 0.5; }
 .empty-state p { color: var(--fg); font-size: 1.05rem; }
 .empty-state p.muted { color: var(--muted); font-size: 0.85rem; }
 #config-dialog {
@@ -222,62 +453,31 @@ body {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
-#config-dialog h2 {
-  font-size: 1.1rem;
-  margin-bottom: 14px;
-  font-weight: 600;
-}
+#config-dialog h2 { font-size: 1.1rem; margin-bottom: 14px; font-weight: 600; }
 #config-dialog form { display: flex; flex-direction: column; gap: 10px; }
 #config-dialog label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 0.78rem;
-  color: var(--muted);
+  display: flex; flex-direction: column; gap: 4px;
+  font-size: 0.78rem; color: var(--muted);
 }
 #config-dialog input {
-  background: var(--bg);
-  color: var(--fg);
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  padding: 7px 10px;
-  font-size: 0.9rem;
-  font-family: inherit;
+  background: var(--bg); color: var(--fg);
+  border: 1px solid var(--border); border-radius: 7px;
+  padding: 7px 10px; font-size: 0.9rem; font-family: inherit;
 }
-#config-dialog input:focus {
-  outline: none;
-  border-color: var(--accent);
-}
-#config-dialog .actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 8px;
-}
+#config-dialog input:focus { outline: none; border-color: var(--accent); }
+#config-dialog .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
 #config-dialog button {
-  background: var(--bg);
-  color: var(--fg);
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  padding: 7px 14px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s, border-color 0.15s;
+  background: var(--bg); color: var(--fg);
+  border: 1px solid var(--border); border-radius: 7px;
+  padding: 7px 14px; font-size: 0.85rem; cursor: pointer;
+  font-family: inherit; transition: background 0.15s, border-color 0.15s;
 }
 #config-dialog button.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #07101f;
-  font-weight: 600;
+  background: var(--accent); border-color: var(--accent);
+  color: #07101f; font-weight: 600;
 }
 #config-dialog button:hover { border-color: var(--accent); }
-#config-dialog .hint {
-  font-size: 0.72rem;
-  color: var(--muted);
-  margin-top: 4px;
-  line-height: 1.4;
-}
+#config-dialog .hint { font-size: 0.72rem; color: var(--muted); margin-top: 4px; line-height: 1.4; }
 @media (max-width: 480px) {
   #grid { grid-template-columns: 1fr; padding: 12px; gap: 10px; }
   #statusbar { font-size: 0.72rem; }
@@ -315,7 +515,7 @@ body {
     <label>Proxy URL (optional)
       <input type="text" name="proxyUrl" autocomplete="off" spellcheck="false" placeholder="http://localhost:8888">
     </label>
-    <p class="hint">Free account at opensky-network.org raises the rate limit. Credentials stored in localStorage on this device only. If the wall is blank due to CORS, run <code>python proxy.py username password</code> and set Proxy URL to http://localhost:8888 — the proxy handles auth server-side.</p>
+    <p class="hint">Free account at <a href="https://opensky-network.org" target="_blank" style="color:var(--accent)">opensky-network.org</a> gives 4,000 requests/day (vs 400 anonymous). Credentials stored only in your browser.<br><br><strong>No-terminal proxy:</strong> double-click <code>start-proxy.vbs</code> to run the proxy silently in the background, then set Proxy URL to <code>http://localhost:8888</code>. To auto-start on login, run <code>setup.bat</code> once.</p>
     <div class="actions">
       <button type="button" id="cfg-cancel">Cancel</button>
       <button type="submit" class="primary" id="cfg-save">Save</button>
@@ -327,8 +527,6 @@ body {
 "use strict";
 
 // USER CONFIG ---------------------------------------------------------------
-// To raise rate limits, create a free account at opensky-network.org
-// then enter your credentials below (or via the gear icon settings dialog):
 const OPENSKY_AUTH = { user: "", pass: "" };
 // ---------------------------------------------------------------------------
 
@@ -432,13 +630,12 @@ const AIRLINES = {
   EVA: "EVA Air",
   CAL: "China Airlines",
   HKE: "Hong Kong Express",
-  MXD: "Maxsus-Avia",
+  MXD: "Batik Air Malaysia",
   BTI: "Air Baltic",
   LOT: "LOT Polish Airlines",
   CSA: "Czech Airlines",
   ROT: "TAROM",
   MAU: "Air Mauritius",
-  ETD2: "Etihad",
   RJA: "Royal Jordanian",
   GFA: "Gulf Air",
   KAC: "Kuwait Airways",
@@ -447,68 +644,309 @@ const AIRLINES = {
   FJI: "Fiji Airways",
   NCA: "Nippon Cargo",
   SQA: "Singapore Asia",
-  EDW: "Edelweiss",
-  BER: "Air Berlin"
+  EDW: "Edelweiss Air",
+  BER: "Air Berlin",
+  BTK: "Batik Air",
+  LNI: "Lion Air",
+  SJY: "Sriwijaya Air",
+  AWQ: "Wings Air",
+  CTV: "Citilink",
+  MNA: "Merpati Nusantara",
+  SJV: "Super Air Jet",
+  TLM: "Thai Lion Air",
+  TVJ: "Thai VietJet Air",
+  NOK: "Nok Air",
+  THD: "Thai Smile",
+  OAL: "Olympic Air",
+  HDA: "Dragonair",
+  AHK: "Air Hong Kong",
+  DHL: "DHL Air",
+  FPO: "FlyPelican",
+  XAX: "AirAsia X",
+  SLK: "SilkAir",
+  TNU: "TransNusa",
+  TAB: "Tibet Airlines",
+  SUJ: "SkyUp",
+  MPH: "Martinair",
+  CAW: "Comair",
+  KQA: "Kenya Airways",
+  ETG: "Etihad Guest",
+  QRE: "Qatar Executive",
+  FFM: "Firefly",
+  MYY: "MASwings",
+  BAV: "Bamboo Airways",
+  BKP: "Bangkok Airways",
+  APJ: "Peach Aviation",
+  ABL: "Air Busan",
+  JJA: "Jeju Air",
+  CHH: "Hainan Airlines",
+  CSZ: "Shenzhen Airlines",
+  CXA: "Xiamen Airlines",
+  CSC: "Sichuan Airlines",
+  TWB: "T'way Air",
+  LAO: "Lao Airlines",
+  PIC: "Pacific Airlines",
+  AIQ: "Thai AirAsia",
+  JST: "Jetstar",
+  EPA: "Spring Airlines",
+  DKH: "Juneyao Airlines",
+  UEA: "Chengdu Airlines",
+  CHB: "West Air",
+  LKE: "Lucky Air",
+  SJX: "Starlux Airlines",
+  HGB: "Greater Bay Airlines",
+  AMU: "Air Macau",
+  SEJ: "SpiceJet",
+  VTI: "Vistara",
+  IAX: "Air India Express",
+  IAD: "AirAsia India",
+  UBD: "Myanmar National Airlines",
+  REP: "Cambodia Angkor Air",
+  APG: "AirAsia Philippines",
+  BAP: "PAL Express",
+  FBA: "flydubai",
+  ABY: "Air Arabia",
+  RBA: "Royal Brunei Airlines",
+  ALK: "SriLankan Airlines",
+  MMA: "Myanmar Airways International",
+  KZR: "Air Astana",
+  SBI: "S7 Airlines",
+  FLY: "Flybig",
+  SAW: "SunAir",
+  CAB: "Cardig Air",
+  OAW: "Helvetic Airways",
+  PLI: "Pelita Air",
+  SYN: "Syphax Airlines",
+  TSC: "Air Transat",
+  EXS: "Jet2",
+  HLF: "Hapag-Lloyd Express",
+  GEC: "Lufthansa Cargo",
+  AHY: "Azerbaijan Airlines",
+  BHA: "Buddha Air",
+  NYT: "Yeti Airlines",
+  BGD: "Biman Bangladesh",
+  BBC: "Biman Bangladesh",
+  SLM: "Surinam Airways",
+  JNA: "Jin Air",
+  ASV: "Air Seoul",
+  EOK: "Aero K",
+  SKY: "Skymark Airlines",
+  ADO: "Air Do",
+  SNJ: "Solaseed Air",
+  SFJ: "StarFlyer",
+  TZP: "Zipair",
+  SJO: "Spring Japan",
+  IBX: "IBEX Airlines",
+  JAC: "Japan Air Commuter",
+  CDC: "Loong Air",
+  CBJ: "Beijing Capital Airlines",
+  HXA: "China Express Airlines",
+  DBH: "Donghai Airlines",
+  AKJ: "Akasa Air",
+  UZB: "Uzbekistan Airways"
+};
+
+const AIRLINE_IATA = {
+  SIA: "SQ", SQC: "SQ", AAL: "AA", UAL: "UA", DAL: "DL",
+  BAW: "BA", AFR: "AF", DLH: "LH", KLM: "KL", UAE: "EK",
+  QTR: "QR", ETD: "EY", CPA: "CX", ANA: "NH", JAL: "JL",
+  KAL: "KE", AAR: "OZ", CCA: "CA", CES: "MU", CSN: "CZ",
+  THY: "TK", QFA: "QF", ANZ: "NZ", VIR: "VS", VOZ: "VA",
+  RYR: "FR", EZY: "U2", WJA: "WS", ACA: "AC", SWA: "WN",
+  JBU: "B6", ASA: "AS", FFT: "F9", NKS: "NK", HAL: "HA",
+  FDX: "FX", UPS: "5X", GTI: "5Y", MAS: "MH", AXM: "AK",
+  TGW: "TR", JSA: "3K", PAL: "PR", CEB: "5J", GIA: "GA",
+  THA: "TG", VJC: "VJ", HVN: "VN", AIC: "AI", IGO: "6E",
+  PIA: "PK", SVA: "SV", MEA: "ME", ELY: "LY", EIN: "EI",
+  FIN: "AY", SAS: "SK", AUA: "OS", SWR: "LX", IBE: "IB",
+  TAP: "TP", AEE: "A3", PGT: "PC", AFL: "SU", ETH: "ET",
+  MSR: "MS", RAM: "AT", SAA: "SA", AMX: "AM", AVA: "AV",
+  LAN: "LA", GLO: "G3", AZU: "AD", CFG: "DE", TUI: "BY",
+  TOM: "BY", WZZ: "W6", VLG: "VY", NAX: "DY", BEL: "SN",
+  KLC: "WA", CLX: "CV", EVA: "BR", CAL: "CI", HKE: "UO",
+  MXD: "OD", BTI: "BT", LOT: "LO", CSA: "OK", ROT: "RO",
+  MAU: "MK", RJA: "RJ", GFA: "GF", KAC: "KU", OMA: "WY",
+  THT: "TN", FJI: "FJ", NCA: "KZ", EDW: "WK", LNI: "JT",
+  CTV: "QG", NOK: "DD", KQA: "KQ",
+  AWQ: "IW", XAX: "D7", SJY: "SJ", BTK: "ID",
+  TLM: "SL", TVJ: "VZ", FFM: "FY", MYY: "MY", BAV: "QH", BKP: "PG",
+  APJ: "MM", ABL: "BX", JJA: "7C", CHH: "HU", CSZ: "ZH",
+  CXA: "MF", CSC: "3U", TWB: "TW", LAO: "QV", PIC: "BL",
+  AIQ: "FD", JST: "JQ",
+  EPA: "9C", DKH: "HO", UEA: "EU", CHB: "PN", LKE: "8L",
+  SJX: "JX", HGB: "HB", AMU: "NX", SEJ: "SG", VTI: "UK",
+  IAX: "IX", IAD: "I5", UBD: "7Y", REP: "K6",
+  APG: "Z2", BAP: "2P", SJV: "IU", TNU: "MZ", TAB: "TV",
+  FBA: "FZ", ABY: "G9",
+  RBA: "BI", ALK: "UL", MMA: "8M", KZR: "KC", SBI: "S7",
+  PLI: "IP", BBC: "BG", BGD: "BG",
+  JNA: "LJ", ASV: "RS",
+  SKY: "BC", ADO: "HD", SNJ: "6J", SFJ: "7G", TZP: "ZG", SJO: "IJ", IBX: "FW", JAC: "JC",
+  CDC: "GJ", CBJ: "JD", HXA: "G5", DBH: "DZ",
+  AKJ: "QP",
+  SLK: "MI", NYT: "YB", UZB: "HY",
+  THD: "WE",
+};
+
+const AIRPORT_IATA = {
+  WSSS:"SIN", WMKK:"KUL", WMKC:"KBR", WMKP:"PEN", WMKD:"KUA",
+  WIII:"CGK", WAAA:"UPG", WITT:"DPS", WIDD:"BTH", WIBB:"PKU",
+  WBSB:"BWN", VTBS:"BKK", VTBD:"DMK", VTSP:"HKT", VTSS:"HDY",
+  RPLL:"MNL", RPVP:"PPS", RPMD:"DVO", VVTS:"SGN", VVNB:"HAN",
+  VDPP:"PNH", VLVT:"VTE", VYYY:"RGN", VOMM:"MAA", VIDP:"DEL",
+  VABB:"BOM", VOCL:"COK", VOBG:"BLR", VECC:"CCU", VIAG:"AGR",
+  OPKC:"KHI", OPLA:"LHE", OPLR:"LHE", YSSY:"SYD", YMML:"MEL",
+  YBBN:"BNE", YPPH:"PER", NZAA:"AKL", NZCH:"CHC", EGLL:"LHR",
+  EGKK:"LGW", EGSS:"STN", EHAM:"AMS", LFPG:"CDG", LFPO:"ORY",
+  EDDF:"FRA", EDDM:"MUC", LEMD:"MAD", LEBL:"BCN", LIRF:"FCO",
+  LIMC:"MXP", LSZH:"ZRH", LOWW:"VIE", EBBR:"BRU", ENGM:"OSL",
+  ESSA:"ARN", EKCH:"CPH", EFHK:"HEL", LPPT:"LIS", LGAV:"ATH",
+  LTFM:"IST", LTBA:"ISL", OMDB:"DXB", OMAA:"AUH", OMDW:"DWC",
+  OTHH:"DOH", OERK:"RUH", OJAM:"AMM", OLBA:"BEY", OOMS:"MCT",
+  OKBK:"KWI", LLBG:"TLV", HECA:"CAI", GMMN:"CMN", HAAB:"ADD",
+  FAOR:"JNB", FALE:"DUR", HKJK:"NBO", ZBAA:"PEK", ZBAD:"PKX",
+  ZGSZ:"SZX", ZGGG:"CAN", ZSPD:"PVG", ZSSS:"SHA", ZUUU:"CTU",
+  ZUCK:"CKG", RJAA:"NRT", RJTT:"HND", RJBB:"KIX", RJFF:"FUK",
+  RJSN:"KIJ", RKSI:"ICN", RKSS:"GMP", VHHH:"HKG", RCTP:"TPE",
+  RCSS:"TSA", KATL:"ATL", KLAX:"LAX", KJFK:"JFK", KORD:"ORD",
+  KDFW:"DFW", KDEN:"DEN", KSFO:"SFO", KLAS:"LAS", KPHX:"PHX",
+  KMIA:"MIA", KBOS:"BOS", KSEA:"SEA", KIAH:"IAH", KDTW:"DTW",
+  KMSP:"MSP", KLGA:"LGA", KEWR:"EWR", KPHL:"PHL", KBWI:"BWI",
+  CYYZ:"YYZ", CYVR:"YVR", CYUL:"YUL", CYYC:"YYC", MMMX:"MEX",
+  SBGR:"GRU", SBGL:"GIG", SAEZ:"EZE", SKBO:"BOG", SCEL:"SCL",
 };
 
 const COUNTRY_FLAGS = {
   "Singapore": "🇸🇬",
-  "United States": "🇺🇸",
-  "United Kingdom": "🇬🇧",
-  "Germany": "🇩🇪",
-  "France": "🇫🇷",
-  "Japan": "🇯🇵",
-  "China": "🇨🇳",
-  "India": "🇮🇳",
-  "Australia": "🇦🇺",
-  "Canada": "🇨🇦",
-  "Netherlands": "🇳🇱",
-  "United Arab Emirates": "🇦🇪",
-  "Qatar": "🇶🇦",
-  "Hong Kong": "🇭🇰",
-  "Korea": "🇰🇷",
-  "Republic of Korea": "🇰🇷",
-  "South Korea": "🇰🇷",
   "Malaysia": "🇲🇾",
   "Indonesia": "🇮🇩",
   "Thailand": "🇹🇭",
-  "Viet Nam": "🇻🇳",
-  "Vietnam": "🇻🇳",
+  "Viet Nam": "🇻🇳", "Vietnam": "🇻🇳",
   "Philippines": "🇵🇭",
-  "Turkey": "🇹🇷",
+  "Brunei Darussalam": "🇧🇳", "Brunei": "🇧🇳",
+  "Myanmar": "🇲🇲", "Burma": "🇲🇲",
+  "Cambodia": "🇰🇭",
+  "Lao PDR": "🇱🇦", "Laos": "🇱🇦", "Lao People's Democratic Republic": "🇱🇦",
+  "Timor-Leste": "🇹🇱", "East Timor": "🇹🇱",
+  "China": "🇨🇳", "People's Republic of China": "🇨🇳",
+  "Hong Kong": "🇭🇰", "Macao": "🇲🇴", "Macau": "🇲🇴",
+  "Taiwan": "🇹🇼", "Taiwan, Province of China": "🇹🇼",
+  "Japan": "🇯🇵",
+  "Korea": "🇰🇷", "Republic of Korea": "🇰🇷", "South Korea": "🇰🇷",
+  "Democratic People's Republic of Korea": "🇰🇵", "North Korea": "🇰🇵",
+  "Mongolia": "🇲🇳",
+  "India": "🇮🇳",
+  "Pakistan": "🇵🇰",
+  "Bangladesh": "🇧🇩",
+  "Sri Lanka": "🇱🇰",
+  "Nepal": "🇳🇵",
+  "Maldives": "🇲🇻",
+  "Bhutan": "🇧🇹",
+  "Australia": "🇦🇺",
+  "New Zealand": "🇳🇿",
+  "Fiji": "🇫🇯",
+  "Papua New Guinea": "🇵🇬",
+  "United Arab Emirates": "🇦🇪",
+  "Qatar": "🇶🇦",
   "Saudi Arabia": "🇸🇦",
+  "Kuwait": "🇰🇼",
+  "Bahrain": "🇧🇭",
+  "Oman": "🇴🇲",
+  "Yemen": "🇾🇪",
+  "Jordan": "🇯🇴",
+  "Lebanon": "🇱🇧",
   "Israel": "🇮🇱",
+  "Iran": "🇮🇷", "Iran, Islamic Republic of": "🇮🇷",
+  "Iraq": "🇮🇶",
+  "Syria": "🇸🇾", "Syrian Arab Republic": "🇸🇾",
+  "Turkey": "🇹🇷", "Türkiye": "🇹🇷",
+  "United Kingdom": "🇬🇧",
+  "Germany": "🇩🇪",
+  "France": "🇫🇷",
+  "Netherlands": "🇳🇱",
+  "Belgium": "🇧🇪",
+  "Luxembourg": "🇱🇺",
+  "Switzerland": "🇨🇭",
+  "Austria": "🇦🇹",
+  "Spain": "🇪🇸",
+  "Portugal": "🇵🇹",
+  "Italy": "🇮🇹",
+  "Greece": "🇬🇷",
   "Ireland": "🇮🇪",
   "Finland": "🇫🇮",
   "Sweden": "🇸🇪",
   "Norway": "🇳🇴",
   "Denmark": "🇩🇰",
-  "Switzerland": "🇨🇭",
-  "Austria": "🇦🇹",
-  "Belgium": "🇧🇪",
-  "Spain": "🇪🇸",
-  "Portugal": "🇵🇹",
-  "Italy": "🇮🇹",
-  "Greece": "🇬🇷",
-  "Russia": "🇷🇺",
-  "Russian Federation": "🇷🇺",
+  "Iceland": "🇮🇸",
+  "Poland": "🇵🇱",
+  "Czech Republic": "🇨🇿", "Czechia": "🇨🇿",
+  "Slovakia": "🇸🇰",
+  "Hungary": "🇭🇺",
+  "Romania": "🇷🇴",
+  "Bulgaria": "🇧🇬",
+  "Croatia": "🇭🇷",
+  "Serbia": "🇷🇸",
+  "Slovenia": "🇸🇮",
+  "Ukraine": "🇺🇦",
+  "Belarus": "🇧🇾",
+  "Latvia": "🇱🇻",
+  "Lithuania": "🇱🇹",
+  "Estonia": "🇪🇪",
+  "Moldova": "🇲🇩", "Republic of Moldova": "🇲🇩",
+  "Malta": "🇲🇹",
+  "Cyprus": "🇨🇾",
+  "Russia": "🇷🇺", "Russian Federation": "🇷🇺",
+  "Kazakhstan": "🇰🇿",
+  "Uzbekistan": "🇺🇿",
+  "Azerbaijan": "🇦🇿",
+  "Georgia": "🇬🇪",
+  "Armenia": "🇦🇲",
+  "United States": "🇺🇸", "United States of America": "🇺🇸",
+  "Canada": "🇨🇦",
+  "Mexico": "🇲🇽",
+  "Brazil": "🇧🇷",
+  "Argentina": "🇦🇷",
+  "Colombia": "🇨🇴",
+  "Chile": "🇨🇱",
+  "Peru": "🇵🇪",
+  "Venezuela": "🇻🇪",
+  "Ecuador": "🇪🇨",
+  "Bolivia": "🇧🇴",
+  "Paraguay": "🇵🇾",
+  "Uruguay": "🇺🇾",
+  "Cuba": "🇨🇺",
+  "Jamaica": "🇯🇲",
+  "Dominican Republic": "🇩🇴",
+  "Costa Rica": "🇨🇷",
+  "Panama": "🇵🇦",
+  "Guatemala": "🇬🇹",
   "Ethiopia": "🇪🇹",
   "Egypt": "🇪🇬",
   "Morocco": "🇲🇦",
   "South Africa": "🇿🇦",
   "Kenya": "🇰🇪",
-  "Brazil": "🇧🇷",
-  "Mexico": "🇲🇽",
-  "Argentina": "🇦🇷",
-  "Colombia": "🇨🇴",
-  "New Zealand": "🇳🇿",
-  "Pakistan": "🇵🇰"
+  "Nigeria": "🇳🇬",
+  "Ghana": "🇬🇭",
+  "Tanzania": "🇹🇿", "United Republic of Tanzania": "🇹🇿",
+  "Uganda": "🇺🇬",
+  "Algeria": "🇩🇿",
+  "Tunisia": "🇹🇳",
+  "Libya": "🇱🇾",
+  "Sudan": "🇸🇩",
+  "Zimbabwe": "🇿🇼",
+  "Mozambique": "🇲🇿",
+  "Madagascar": "🇲🇬",
+  "Mauritius": "🇲🇺",
 };
+
+const routesCache = new Map();
+const photoCache  = new Map();
+const acInfoCache = new Map();
 
 const state = {
   userLat: null,
   userLon: null,
-  flights: new Map(), // icao24 -> {data, el, fetchedAt}
+  flights: new Map(),
   pollTimer: null,
   tickTimer: null,
   backoffMs: 0,
@@ -517,6 +955,81 @@ const state = {
   polling: false,
   config: { ...DEFAULT_CONFIG }
 };
+
+const AIRCRAFT_TYPES = {
+  B732:"Boeing 737-200", B733:"Boeing 737-300", B734:"Boeing 737-400", B735:"Boeing 737-500",
+  B736:"Boeing 737-600", B737:"Boeing 737-700", B738:"Boeing 737-800", B739:"Boeing 737-900",
+  B37M:"Boeing 737 MAX 7", B38M:"Boeing 737 MAX 8", B39M:"Boeing 737 MAX 9", B3XM:"Boeing 737 MAX 10",
+  B741:"Boeing 747-100", B742:"Boeing 747-200", B743:"Boeing 747-300", B744:"Boeing 747-400",
+  B748:"Boeing 747-8", B74F:"Boeing 747-400F", B74S:"Boeing 747SP",
+  B752:"Boeing 757-200", B753:"Boeing 757-300",
+  B762:"Boeing 767-200", B763:"Boeing 767-300", B764:"Boeing 767-400",
+  B772:"Boeing 777-200", B77L:"Boeing 777-200LR", B773:"Boeing 777-300", B77W:"Boeing 777-300ER",
+  B77F:"Boeing 777F", B779:"Boeing 777-9",
+  B788:"Boeing 787-8", B789:"Boeing 787-9", B78X:"Boeing 787-10",
+  A318:"Airbus A318", A319:"Airbus A319", A320:"Airbus A320", A321:"Airbus A321",
+  A19N:"Airbus A319neo", A20N:"Airbus A320neo", A21N:"Airbus A321neo", A21X:"Airbus A321XLR",
+  BCS1:"Airbus A220-100", BCS3:"Airbus A220-300",
+  A332:"Airbus A330-200", A333:"Airbus A330-300", A338:"Airbus A330-800neo", A339:"Airbus A330-900neo",
+  A342:"Airbus A340-200", A343:"Airbus A340-300", A345:"Airbus A340-500", A346:"Airbus A340-600",
+  A359:"Airbus A350-900", A35K:"Airbus A350-1000", A388:"Airbus A380",
+  E170:"Embraer E170", E175:"Embraer E175", E190:"Embraer E190", E195:"Embraer E195",
+  E75L:"Embraer E175-E2", E7W5:"Embraer E175-E2", E290:"Embraer E190-E2", E295:"Embraer E195-E2",
+  CRJ2:"Bombardier CRJ-200", CRJ7:"Bombardier CRJ-700", CRJ9:"Bombardier CRJ-900", CRJX:"Bombardier CRJ-1000",
+  DH8A:"DHC-8-100", DH8B:"DHC-8-200", DH8C:"DHC-8-300", DH8D:"DHC-8-400 (Q400)",
+  AT43:"ATR 42-300", AT45:"ATR 42-500", AT46:"ATR 42-600",
+  AT72:"ATR 72-200", AT75:"ATR 72-500", AT76:"ATR 72-600",
+  F100:"Fokker 100", F70:"Fokker 70", F27:"Fokker 27", F28:"Fokker 28",
+  SF34:"Saab 340", SF50:"Saab 2000", SB20:"Saab 2000",
+  B461:"BAe 146-100", B462:"BAe 146-200", B463:"BAe 146-300",
+  RJ1H:"Avro RJ100", RJ85:"Avro RJ85",
+  MD11:"McDonnell Douglas MD-11", M11F:"McDonnell Douglas MD-11F",
+  MD82:"McDonnell Douglas MD-82", MD83:"McDonnell Douglas MD-83",
+  MD88:"McDonnell Douglas MD-88", MD90:"McDonnell Douglas MD-90",
+  IL76:"Ilyushin IL-76", IL96:"Ilyushin IL-96",
+  AN12:"Antonov AN-12", AN24:"Antonov AN-24", AN26:"Antonov AN-26", AN32:"Antonov AN-32",
+  T154:"Tupolev Tu-154", T204:"Tupolev Tu-204", T214:"Tupolev Tu-214",
+  SU95:"Sukhoi Superjet 100",
+  MA60:"Xian MA60", Y12:"Harbin Y-12",
+  C208:"Cessna 208 Caravan", PC12:"Pilatus PC-12", B190:"Beechcraft 1900",
+  SH36:"Short 360", JS41:"BAe Jetstream 41",
+  GLF2:"Gulfstream G2", GLF3:"Gulfstream G3", GLF4:"Gulfstream G4", GLF5:"Gulfstream G550",
+  GLF6:"Gulfstream G650", GL5T:"Bombardier Global 5000", GLEX:"Bombardier Global Express",
+  GL7T:"Bombardier Global 7500",
+  F900:"Dassault Falcon 900", FA7X:"Dassault Falcon 7X", FA8X:"Dassault Falcon 8X",
+  FA50:"Dassault Falcon 50", F2TH:"Dassault Falcon 2000",
+  CL30:"Bombardier Challenger 300", CL35:"Bombardier Challenger 350",
+  CL60:"Bombardier Challenger 600", CL64:"Bombardier Challenger 604", CL65:"Bombardier Challenger 605",
+  E50P:"Embraer Phenom 100", E55P:"Embraer Phenom 300",
+  PC24:"Pilatus PC-24",
+  H25B:"Hawker 750", H25C:"Hawker 800", H25X:"Hawker 900XP",
+  LJ35:"Learjet 35", LJ45:"Learjet 45", LJ60:"Learjet 60", LJ75:"Learjet 75",
+  C25A:"Cessna Citation CJ2", C25B:"Cessna Citation CJ3", C25C:"Cessna Citation CJ4",
+  C510:"Cessna Citation Mustang", C525:"Cessna CitationJet", C550:"Cessna Citation II",
+  C56X:"Cessna Citation Excel", C560:"Cessna Citation V", C68A:"Cessna Citation Sovereign",
+  C750:"Cessna Citation X", C680:"Cessna Citation Sovereign",
+  EA50:"Eclipse 500",
+};
+
+const CARGO_ICAO = new Set([
+  'FDX','UPS','GTI','CLX','NCA','AHK','GEC','DHL','SQC','CAB','MPH',
+  'BOX','PAC','ATN','ABX','CKS','TAY','KZR','SVB','SBN'
+]);
+
+const CARGO_AC_TYPES = new Set([
+  'B77F','B74F','M11F','IL76','AN12','B748'
+]);
+
+const BIZJET_AC_TYPES = new Set([
+  'GLF2','GLF3','GLF4','GLF5','GLF6','GL5T','GLEX','GL7T',
+  'F900','FA7X','FA8X','FA50','F2TH',
+  'CL30','CL35','CL60','CL64','CL65',
+  'E50P','E55P','PC24','PC12',
+  'H25B','H25C','H25X',
+  'LJ35','LJ45','LJ60','LJ75',
+  'C25A','C25B','C25C','C510','C525','C550','C56X','C560','C68A','C750','C680',
+  'EA50'
+]);
 
 // MATH ----------------------------------------------------------------------
 function haversineKm(lat1, lon1, lat2, lon2) {
@@ -532,19 +1045,13 @@ function haversineKm(lat1, lon1, lat2, lon2) {
 function bbox(lat, lon, radiusKm) {
   const dLat = radiusKm / 111.0;
   const dLon = radiusKm / (111.0 * Math.cos((lat * Math.PI) / 180) || 0.00001);
-  return {
-    lamin: lat - dLat,
-    lomin: lon - dLon,
-    lamax: lat + dLat,
-    lomax: lon + dLon
-  };
+  return { lamin: lat - dLat, lomin: lon - dLon, lamax: lat + dLat, lomax: lon + dLon };
 }
 
 function compass(deg) {
   if (deg == null || isNaN(deg)) return "";
   const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-  const idx = ((Math.round(((deg % 360) + 360) / 45)) % 8);
-  return dirs[idx];
+  return dirs[((Math.round(((deg % 360) + 360) / 45)) % 8)];
 }
 
 function metersToFeet(m) { return m * 3.28084; }
@@ -554,24 +1061,160 @@ function interpolatePosition(lat, lon, velMps, trackDeg, elapsedSec) {
   if (velMps == null || trackDeg == null || !elapsedSec) return { lat, lon };
   const distM = velMps * elapsedSec;
   const trackRad = (trackDeg * Math.PI) / 180;
-  // flat-earth approximation
-  const dN = distM * Math.cos(trackRad); // meters north
-  const dE = distM * Math.sin(trackRad); // meters east
+  const dN = distM * Math.cos(trackRad);
+  const dE = distM * Math.sin(trackRad);
   const dLat = dN / 111000;
   const dLon = dE / (111000 * Math.cos((lat * Math.PI) / 180) || 0.00001);
   return { lat: lat + dLat, lon: lon + dLon };
 }
 
+const VOICE_CALLSIGNS = {
+  "AIRASIA":   { iata: "AK", airline: "AirAsia" },
+  "MALINDO":   { iata: "OD", airline: "Batik Air Malaysia" },
+  "BATIK":     { iata: "OD", airline: "Batik Air Malaysia" },
+  "GARUDA":    { iata: "GA", airline: "Garuda Indonesia" },
+  "CITILINK":  { iata: "QG", airline: "Citilink" },
+  "LIONAIR":   { iata: "JT", airline: "Lion Air" },
+  "LION":      { iata: "JT", airline: "Lion Air" },
+  "WINGS":     { iata: "IW", airline: "Wings Air" },
+  "SRIWIJAYA": { iata: "SJ", airline: "Sriwijaya Air" },
+  "VIETJET":   { iata: "VJ", airline: "VietJet Air" },
+  "BAMBOO":    { iata: "QH", airline: "Bamboo Airways" },
+  "CEBU":      { iata: "5J", airline: "Cebu Pacific" },
+  "JETSTAR":   { iata: "3K", airline: "Jetstar Asia" },
+  "SCOOT":     { iata: "TR", airline: "Scoot" },
+  "SINGAPORE": { iata: "SQ", airline: "Singapore Airlines" },
+  "SPEEDBIRD": { iata: "BA", airline: "British Airways" },
+  "LUFTHANSA": { iata: "LH", airline: "Lufthansa" },
+  "EMIRATES":  { iata: "EK", airline: "Emirates" },
+  "QANTAS":    { iata: "QF", airline: "Qantas" },
+  "MALAYSIA":  { iata: "MH", airline: "Malaysia Airlines" },
+  "THAI":      { iata: "TG", airline: "Thai Airways" },
+  "VIETNAM":   { iata: "VN", airline: "Vietnam Airlines" },
+  "PHILIPPINE":{ iata: "PR", airline: "Philippine Airlines" },
+  "INDONES":   { iata: "GA", airline: "Garuda Indonesia" },
+  "KOREANAIR": { iata: "KE", airline: "Korean Air" },
+  "CATHAY":    { iata: "CX", airline: "Cathay Pacific" },
+  "FINNAIR":   { iata: "AY", airline: "Finnair" },
+  "XPRESS":    { iata: "XN", airline: "Xpress Air" },
+  "PEACH":     { iata: "MM", airline: "Peach Aviation" },
+  "BANGKOKAIR":{ iata: "PG", airline: "Bangkok Airways" },
+  "HAINAN":    { iata: "HU", airline: "Hainan Airlines" },
+  "TWAY":      { iata: "TW", airline: "T'way Air" },
+  "JEJUAIR":   { iata: "7C", airline: "Jeju Air" },
+  "FIREFLY":   { iata: "FY", airline: "Firefly" },
+  "MASWINGS":  { iata: "MY", airline: "MASwings" },
+  "LAOAIR":    { iata: "QV", airline: "Lao Airlines" },
+};
+
 // HELPERS -------------------------------------------------------------------
 function airlineFromCallsign(cs) {
   if (!cs) return null;
-  const prefix = cs.trim().substring(0, 3).toUpperCase();
-  return AIRLINES[prefix] || null;
+  const upper = cs.trim().toUpperCase();
+  const prefix3 = upper.substring(0, 3);
+  if (AIRLINES[prefix3]) return AIRLINES[prefix3];
+  const voices = Object.keys(VOICE_CALLSIGNS).sort((a, b) => b.length - a.length);
+  for (const v of voices) {
+    if (upper.startsWith(v)) return VOICE_CALLSIGNS[v].airline;
+  }
+  return null;
 }
 
-function flagEmoji(country) {
-  if (!country) return "🏳️"; // white flag
-  return COUNTRY_FLAGS[country] || "🏳️";
+function countryIsoCode(country) {
+  if (!country) return "";
+  const emoji = COUNTRY_FLAGS[country.trim()] || "";
+  if (!emoji) return "";
+  try {
+    const chars = [...emoji];
+    if (chars.length < 2) return "";
+    const a = chars[0].codePointAt(0) - 0x1F1E6;
+    const b = chars[1].codePointAt(0) - 0x1F1E6;
+    if (a < 0 || a > 25 || b < 0 || b > 25) return "";
+    return String.fromCharCode(a + 65, b + 65).toLowerCase();
+  } catch { return ""; }
+}
+
+function airlineLogoUrl(callsign) {
+  if (!callsign) return "";
+  const prefix = callsign.trim().substring(0, 3).toUpperCase();
+  const iata = AIRLINE_IATA[prefix];
+  if (!iata) return "";
+  return "https://www.gstatic.com/flights/airline_logos/70px/" + iata + ".png";
+}
+
+function airportDisplay(icao) {
+  if (!icao) return "";
+  return AIRPORT_IATA[icao.toUpperCase()] || icao.toUpperCase();
+}
+
+function iataCallsign(cs) {
+  if (!cs || cs.length < 2) return cs;
+  const s = cs.trim();
+  const upper = s.toUpperCase();
+  const iata3 = AIRLINE_IATA[upper.substring(0, 3)];
+  if (iata3) return iata3 + s.substring(3);
+  const voices = Object.keys(VOICE_CALLSIGNS).sort((a, b) => b.length - a.length);
+  for (const v of voices) {
+    if (upper.startsWith(v)) return VOICE_CALLSIGNS[v].iata + s.substring(v.length);
+  }
+  return s;
+}
+
+async function fetchRoute(callsign) {
+  const cs = callsign.trim().toUpperCase();
+  if (routesCache.has(cs)) return routesCache.get(cs);
+  const promise = (async () => {
+    try {
+      const url = "https://api.adsbdb.com/v0/callsign/" + encodeURIComponent(cs);
+      const resp = await fetch(url);
+      if (!resp.ok) return null;
+      const json = await resp.json();
+      const fr = json.response && json.response.flightroute;
+      if (!fr) return null;
+      const orig = fr.origin && (fr.origin.iata_code || fr.origin.icao_code);
+      const dest = fr.destination && (fr.destination.iata_code || fr.destination.icao_code);
+      return (orig && dest) ? [orig, dest] : null;
+    } catch (e) { console.warn("[FlightWall] fetchRoute error:", cs, e.message); return null; }
+  })();
+  routesCache.set(cs, promise);
+  return promise;
+}
+
+async function fetchAircraftPhoto(icao24) {
+  const hex = icao24.toLowerCase();
+  if (photoCache.has(hex)) return photoCache.get(hex);
+  const promise = (async () => {
+    try {
+      const resp = await fetch("https://api.planespotters.net/pub/photos/hex/" + hex);
+      if (!resp.ok) return { url: null };
+      const json = await resp.json();
+      const p = json.photos && json.photos[0];
+      if (!p) return { url: null };
+      const url = (p.thumbnail_large && p.thumbnail_large.src) || (p.thumbnail && p.thumbnail.src) || null;
+      return { url };
+    } catch { return { url: null }; }
+  })();
+  photoCache.set(hex, promise);
+  return promise;
+}
+
+async function fetchAircraftInfo(icao24) {
+  const hex = icao24.toLowerCase();
+  if (acInfoCache.has(hex)) return acInfoCache.get(hex);
+  const promise = (async () => {
+    try {
+      const resp = await fetch("https://api.adsbdb.com/v0/aircraft/" + hex);
+      if (!resp.ok) return { type: null, rawType: null, reg: null };
+      const json = await resp.json();
+      const ac = json.response && json.response.aircraft;
+      if (!ac) return { type: null, rawType: null, reg: null };
+      const rawType = (ac.icao_type || ac.type || "").toUpperCase() || null;
+      const type = rawType ? (AIRCRAFT_TYPES[rawType] || rawType) : null;
+      return { type, rawType, reg: ac.registration || null };
+    } catch { return { type: null, rawType: null, reg: null }; }
+  })();
+  acInfoCache.set(hex, promise);
+  return promise;
 }
 
 function relativeTime(unixSec) {
@@ -594,16 +1237,13 @@ function loadConfig() {
   try {
     const stored = JSON.parse(localStorage.getItem("fw.config") || "{}");
     return { ...DEFAULT_CONFIG, ...stored };
-  } catch (e) {
-    return { ...DEFAULT_CONFIG };
-  }
+  } catch (e) { return { ...DEFAULT_CONFIG }; }
 }
 
 function saveConfig(cfg) {
-  try {
-    localStorage.setItem("fw.config", JSON.stringify(cfg));
-  } catch (e) {}
+  try { localStorage.setItem("fw.config", JSON.stringify(cfg)); } catch (e) {}
   state.config = { ...DEFAULT_CONFIG, ...cfg };
+  routesCache.clear();
 }
 
 function getActiveAuth() {
@@ -647,9 +1287,8 @@ async function acquireLocation() {
 function trackQuota() {
   const today = new Date().toISOString().slice(0, 10);
   let stored;
-  try {
-    stored = JSON.parse(localStorage.getItem("fw.quota") || "{}");
-  } catch (e) { stored = {}; }
+  try { stored = JSON.parse(localStorage.getItem("fw.quota") || "{}"); }
+  catch (e) { stored = {}; }
   if (stored.day !== today) stored = { day: today, count: 0 };
   stored.count++;
   try { localStorage.setItem("fw.quota", JSON.stringify(stored)); } catch (e) {}
@@ -683,7 +1322,6 @@ async function fetchStates() {
   const url = base + "/api/states/all" + query;
   const headers = {};
   const auth = getActiveAuth();
-  // Only send Authorization header when NOT using proxy (proxy handles auth server-side)
   if (auth.user && !proxyBase) {
     headers["Authorization"] = "Basic " + btoa(auth.user + ":" + auth.pass);
   }
@@ -719,7 +1357,7 @@ function processStates(rawStates) {
   const result = [];
   for (const s of rawStates) {
     if (!s) continue;
-    if (s[8] === true) continue; // on_ground
+    if (s[8] === true) continue;
     const sLat = s[6];
     const sLon = s[5];
     if (sLat == null || sLon == null) continue;
@@ -754,58 +1392,188 @@ function buildCard(f) {
   el.className = "card enter";
   el.dataset.icao = f.icao24;
   el.innerHTML = ''
-    + '<div class="row1">'
-    +   '<span class="callsign"></span>'
-    +   '<span class="flag"></span>'
+    + '<div class="hero">'
+    +   '<img class="aircraft-photo" alt="" loading="lazy" referrerpolicy="no-referrer">'
+    +   '<div class="placeholder">[ AIRCRAFT  PHOTO ]</div>'
+    +   '<div class="hero-chip">'
+    +     '<img class="flag" src="" alt="" width="18" height="13" loading="lazy" onerror="this.style.visibility=\'hidden\'">'
+    +   '</div>'
+    +   '<div class="hero-foot">'
+    +     '<span class="ac-type-val"></span>'
+    +     '<span class="photo-reg"></span>'
+    +   '</div>'
     + '</div>'
-    + '<div class="row2">'
-    +   '<span class="airline"></span>'
-    +   '<span class="icao"></span>'
+    + '<div class="header">'
+    +   '<div class="airline"></div>'
+    +   '<div class="callsign-row">'
+    +     '<img class="header-logo" src="" alt="" loading="lazy" style="display:none" onerror="this.style.display=\'none\'">'
+    +     '<div class="callsign"></div>'
+    +     '<div class="icao"></div>'
+    +   '</div>'
     + '</div>'
-    + '<div class="divider"></div>'
+    + '<div class="route-row">'
+    +   '<span class="route-iata route-from"></span>'
+    +   '<span class="route-arrow">'
+    +     '<span class="line"></span>'
+    +     '<svg width="12" height="9" viewBox="0 0 14 10" fill="none" aria-hidden="true">'
+    +       '<path d="M1 5 H12 M8 1 L12 5 L8 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'
+    +     '</svg>'
+    +   '</span>'
+    +   '<span class="route-iata route-to"></span>'
+    + '</div>'
     + '<div class="stats">'
     +   '<div class="stat"><span class="stat-label">Altitude</span><span class="stat-value alt"></span></div>'
     +   '<div class="stat"><span class="stat-label">Speed</span><span class="stat-value spd"></span></div>'
     +   '<div class="stat"><span class="stat-label">Distance</span><span class="stat-value dst"></span></div>'
     +   '<div class="stat"><span class="stat-label">Heading</span><span class="stat-value hdg"></span></div>'
     + '</div>'
-    + '<div class="last-contact"></div>';
-  setTimeout(() => el.classList.remove("enter"), 600);
+    + '<div class="card-footer">'
+    +   '<div class="badges"></div>'
+    +   '<div class="last-contact"><span class="live-dot"></span><span class="lc-text"></span></div>'
+    + '</div>';
+  setTimeout(() => el.classList.remove("enter"), 700);
   return el;
 }
 
+function setStatValue(el, content) {
+  el.innerHTML = "";
+  if (typeof content === "string") { el.textContent = content; return; }
+  for (const part of content) {
+    if (part == null) continue;
+    if (typeof part === "string") { el.appendChild(document.createTextNode(part)); }
+    else { el.appendChild(part); }
+  }
+}
+
+function span(cls, txt) {
+  const s = document.createElement("span");
+  s.className = cls;
+  s.textContent = txt;
+  return s;
+}
+
 function updateCard(el, f, glow) {
-  const callsign = f.callsign || f.icao24 || "—";
-  el.querySelector(".callsign").textContent = callsign;
-  el.querySelector(".flag").textContent = flagEmoji(f.country);
+  const rawCs = f.callsign || f.icao24 || "—";
+  el.querySelector(".callsign").textContent = iataCallsign(rawCs);
+
+  const flagEl = el.querySelector(".flag");
+  if (flagEl) {
+    const iso = countryIsoCode(f.country);
+    if (iso) { flagEl.src = "https://flagcdn.com/20x15/" + iso + ".png"; flagEl.alt = iso.toUpperCase(); flagEl.style.visibility = ""; }
+    else { flagEl.style.visibility = "hidden"; }
+  }
+
+  const logoEl = el.querySelector(".header-logo");
+  if (logoEl) {
+    const url = airlineLogoUrl(f.callsign);
+    if (url) { logoEl.src = url; logoEl.style.display = ""; }
+    else { logoEl.style.display = "none"; }
+  }
+
   const airline = airlineFromCallsign(f.callsign) || f.country || "—";
   el.querySelector(".airline").textContent = airline;
-  el.querySelector(".icao").textContent = (f.icao24 || "—").toUpperCase();
-  const altM = f.geo_altitude ?? f.baro_altitude;
-  const altTxt = altM != null ? Math.round(metersToFeet(altM)).toLocaleString() + " ft" : "—";
-  el.querySelector(".alt").textContent = altTxt;
-  const spdTxt = f.velocity != null ? Math.round(mpsToKnots(f.velocity)) + " kts" : "—";
-  el.querySelector(".spd").textContent = spdTxt;
-  el.querySelector(".dst").textContent = f.distanceKm != null ? f.distanceKm.toFixed(1) + " km" : "—";
-  const hdgTxt = f.true_track != null
-    ? Math.round(f.true_track) + "° " + compass(f.true_track)
-    : "—";
-  el.querySelector(".hdg").textContent = hdgTxt;
-  const lc = el.querySelector(".last-contact");
-  lc.textContent = "Last contact: " + relativeTime(f.last_contact);
-  const ageSec = f.last_contact ? (Date.now() / 1000 - f.last_contact) : 0;
-  if (ageSec > 60) {
-    el.classList.add("stale");
-    lc.classList.add("stale-time");
-  } else {
-    el.classList.remove("stale");
-    lc.classList.remove("stale-time");
+  const iataCode = AIRLINE_IATA[(f.callsign || "").trim().substring(0, 3).toUpperCase()] || "";
+  el.querySelector(".icao").textContent = iataCode || (f.icao24 || "—").toUpperCase();
+
+  const prefix3 = (f.callsign || "").trim().substring(0, 3).toUpperCase();
+  const badgesEl = el.querySelector(".badges");
+  if (badgesEl) {
+    badgesEl.innerHTML = "";
+    if (CARGO_ICAO.has(prefix3)) {
+      badgesEl.appendChild(span("badge badge-cargo", "Cargo"));
+    }
   }
+
+  const altM = f.geo_altitude ?? f.baro_altitude;
+  const altEl = el.querySelector(".alt");
+  if (altM != null) setStatValue(altEl, [Math.round(metersToFeet(altM)).toLocaleString(), span("unit", "ft")]);
+  else altEl.textContent = "—";
+
+  const spdEl = el.querySelector(".spd");
+  if (f.velocity != null) setStatValue(spdEl, [String(Math.round(mpsToKnots(f.velocity))), span("unit", "kts")]);
+  else spdEl.textContent = "—";
+
+  const dstEl = el.querySelector(".dst");
+  if (f.distanceKm != null) setStatValue(dstEl, [f.distanceKm.toFixed(1), span("unit", "km")]);
+  else dstEl.textContent = "—";
+
+  const hdgEl = el.querySelector(".hdg");
+  if (f.true_track != null) {
+    const deg = Math.round(f.true_track);
+    const tick = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    tick.setAttribute("class", "heading-tick");
+    tick.setAttribute("viewBox", "0 0 14 14");
+    tick.setAttribute("fill", "none");
+    tick.style.setProperty("--rot", deg + "deg");
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", "M7 1 L11 11 L7 8 L3 11 Z");
+    path.setAttribute("fill", "currentColor");
+    tick.appendChild(path);
+    setStatValue(hdgEl, [deg + "°", tick, span("compass", compass(f.true_track))]);
+  } else {
+    hdgEl.textContent = "—";
+  }
+
+  const lc = el.querySelector(".last-contact");
+  const lcText = lc && lc.querySelector(".lc-text");
+  const ageSec = f.last_contact ? (Date.now() / 1000 - f.last_contact) : 0;
+  if (lcText) lcText.textContent = (ageSec > 60 ? "Stale · " : "Live · ") + relativeTime(f.last_contact);
+  if (ageSec > 60) { el.classList.add("stale"); if (lc) lc.classList.add("stale-time"); }
+  else { el.classList.remove("stale"); if (lc) lc.classList.remove("stale-time"); }
+
+  if (f.callsign) {
+    fetchRoute(f.callsign).then(route => {
+      if (!el.isConnected) return;
+      const row = el.querySelector(".route-row");
+      if (route && route.length >= 2 && row) {
+        el.querySelector(".route-from").textContent = airportDisplay(route[0]);
+        el.querySelector(".route-to").textContent = airportDisplay(route[route.length - 1]);
+        row.style.display = "flex";
+      }
+    }).catch(() => {});
+  }
+
+  if (f.icao24) {
+    fetchAircraftInfo(f.icao24).then(({ type, rawType, reg }) => {
+      if (!el.isConnected) return;
+      if (type) {
+        const t = el.querySelector(".ac-type-val");
+        if (t) t.textContent = type;
+      }
+      if (reg) {
+        const r = el.querySelector(".photo-reg");
+        if (r) r.textContent = reg;
+      }
+      if (rawType && badgesEl && badgesEl.isConnected) {
+        if (!badgesEl.querySelector(".badge-cargo") && CARGO_AC_TYPES.has(rawType)) {
+          badgesEl.appendChild(span("badge badge-cargo", "Cargo"));
+        }
+        if (!badgesEl.querySelector(".badge-bizjet") && BIZJET_AC_TYPES.has(rawType) && !airlineFromCallsign(f.callsign)) {
+          badgesEl.appendChild(span("badge badge-bizjet", "Private"));
+        }
+      }
+    }).catch(() => {});
+
+    fetchAircraftPhoto(f.icao24).then(({ url }) => {
+      if (!el.isConnected || !url) return;
+      const img = el.querySelector(".aircraft-photo");
+      const ph = el.querySelector(".placeholder");
+      if (img) {
+        const showPhoto = () => { img.style.display = "block"; if (ph) ph.style.display = "none"; };
+        const hidePhoto = () => { img.style.display = "none"; if (ph) ph.style.display = ""; };
+        img.onload = showPhoto;
+        img.onerror = hidePhoto;
+        img.src = url;
+        if (img.complete && img.naturalWidth > 0) showPhoto();
+      }
+    }).catch(() => {});
+  }
+
   if (glow) {
     el.classList.remove("glow");
-    void el.offsetWidth; // reflow
+    void el.offsetWidth;
     el.classList.add("glow");
-    setTimeout(() => el.classList.remove("glow"), 1100);
+    setTimeout(() => el.classList.remove("glow"), 1200);
   }
 }
 
@@ -832,7 +1600,6 @@ function renderFlights(flights) {
     document.title = "✈ Flight Wall";
     return;
   }
-  // remove empty-state if present
   const empty = grid.querySelector(".empty-state");
   if (empty) { empty.remove(); }
   const seen = new Set();
@@ -851,7 +1618,6 @@ function renderFlights(flights) {
       state.flights.set(f.icao24, { data: f, el: el, fetchedAt: f.fetchedAt });
     }
   }
-  // remove gone flights — delete from Map only after exit animation to prevent duplicate-card race
   for (const [icao, entry] of Array.from(state.flights.entries())) {
     if (!seen.has(icao)) {
       state.flights.delete(icao);
@@ -859,7 +1625,6 @@ function renderFlights(flights) {
       setTimeout(() => { if (entry.el.parentNode) entry.el.parentNode.removeChild(entry.el); }, 450);
     }
   }
-  // reorder cards by distance
   flights.forEach((f, i) => {
     const entry = state.flights.get(f.icao24);
     if (!entry) return;
@@ -914,11 +1679,12 @@ function interpolateTick() {
     const pos = interpolatePosition(f.lat, f.lon, f.velocity, f.true_track, elapsedSec);
     const dist = haversineKm(lat, lon, pos.lat, pos.lon);
     const distEl = entry.el.querySelector(".dst");
-    if (distEl) distEl.textContent = dist.toFixed(1) + " km";
+    if (distEl) setStatValue(distEl, [dist.toFixed(1), span("unit", "km")]);
     const lc = entry.el.querySelector(".last-contact");
+    const lcText = lc && lc.querySelector(".lc-text");
     if (lc) {
-      lc.textContent = "Last contact: " + relativeTime(f.last_contact);
       const ageSec = f.last_contact ? (Date.now() / 1000 - f.last_contact) : 0;
+      if (lcText) lcText.textContent = (ageSec > 60 ? "Stale · " : "Live · ") + relativeTime(f.last_contact);
       if (ageSec > 60) {
         entry.el.classList.add("stale");
         lc.classList.add("stale-time");
