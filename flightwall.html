@@ -312,7 +312,10 @@ body {
     <label>OpenSky password
       <input type="password" name="openskyPass" autocomplete="off">
     </label>
-    <p class="hint">Free account at opensky-network.org raises the rate limit. Credentials stored in localStorage on this device only.</p>
+    <label>Proxy URL (optional)
+      <input type="text" name="proxyUrl" autocomplete="off" spellcheck="false" placeholder="http://localhost:8888">
+    </label>
+    <p class="hint">Free account at opensky-network.org raises the rate limit. Credentials stored in localStorage on this device only. If the wall is blank due to CORS, run <code>python proxy.py username password</code> and set Proxy URL to http://localhost:8888 — the proxy handles auth server-side.</p>
     <div class="actions">
       <button type="button" id="cfg-cancel">Cancel</button>
       <button type="submit" class="primary" id="cfg-save">Save</button>
@@ -339,7 +342,8 @@ const DEFAULT_CONFIG = {
   pollAnonMs: 30000,
   pollAuthMs: 20000,
   openskyUser: "",
-  openskyPass: ""
+  openskyPass: "",
+  proxyUrl: ""
 };
 
 const AIRLINES = {
@@ -670,14 +674,17 @@ async function fetchStates() {
   const lat = state.userLat ?? cfg.fallbackLat;
   const lon = state.userLon ?? cfg.fallbackLon;
   const box = bbox(lat, lon, cfg.radiusKm);
-  const url = "https://opensky-network.org/api/states/all"
-    + "?lamin=" + box.lamin.toFixed(4)
+  const query = "?lamin=" + box.lamin.toFixed(4)
     + "&lomin=" + box.lomin.toFixed(4)
     + "&lamax=" + box.lamax.toFixed(4)
     + "&lomax=" + box.lomax.toFixed(4);
+  const proxyBase = (cfg.proxyUrl || "").replace(/\/$/, "");
+  const base = proxyBase || "https://opensky-network.org";
+  const url = base + "/api/states/all" + query;
   const headers = {};
   const auth = getActiveAuth();
-  if (auth.user) {
+  // Only send Authorization header when NOT using proxy (proxy handles auth server-side)
+  if (auth.user && !proxyBase) {
     headers["Authorization"] = "Basic " + btoa(auth.user + ":" + auth.pass);
   }
   trackQuota();
@@ -879,7 +886,8 @@ function updateStatus(msg, severity) {
   const lon = state.userLon ?? cfg.fallbackLon;
   const lastTxt = state.lastFetch ? fmtTime(state.lastFetch) : "—";
   const auth = getActiveAuth();
-  const authTxt = auth.user ? "🔑 " + auth.user : "👤 anon";
+  const proxyActive = !!(cfg.proxyUrl || "").trim();
+  const authTxt = proxyActive ? "🔁 proxy" : (auth.user ? "🔑 " + auth.user : "👤 anon");
   const parts = [
     "✈ " + state.flights.size + " flights",
     "📍 " + lat.toFixed(3) + "," + lon.toFixed(3),
@@ -974,6 +982,7 @@ function openConfigDialog() {
   form.elements.pollAuthSec.value = Math.round(cfg.pollAuthMs / 1000);
   form.elements.openskyUser.value = cfg.openskyUser || "";
   form.elements.openskyPass.value = cfg.openskyPass || "";
+  form.elements.proxyUrl.value = cfg.proxyUrl || "";
   if (typeof dlg.showModal === "function") dlg.showModal();
   else dlg.setAttribute("open", "");
 }
@@ -1001,7 +1010,8 @@ function wireConfigDialog() {
       pollAnonMs: Math.max(10, Math.min(600, Number(fd.get("pollAnonSec")) || 30)) * 1000,
       pollAuthMs: Math.max(5, Math.min(600, Number(fd.get("pollAuthSec")) || 20)) * 1000,
       openskyUser: String(fd.get("openskyUser") || "").trim(),
-      openskyPass: String(fd.get("openskyPass") || "")
+      openskyPass: String(fd.get("openskyPass") || ""),
+      proxyUrl: String(fd.get("proxyUrl") || "").trim()
     };
     saveConfig(next);
     closeConfigDialog();
