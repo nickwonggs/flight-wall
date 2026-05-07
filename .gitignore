@@ -9,3 +9,8 @@ Thumbs.db
 
 # OMC state
 .omc/
+
+# Proxy credentials and runtime files — never commit
+proxy-config.txt
+proxy.log
+.proxy.pid
