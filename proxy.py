@@ -2,25 +2,42 @@
 Flight Wall local proxy — bypasses OpenSky CORS restrictions for authenticated requests.
 
 Usage:
-    python proxy.py <opensky_username> <opensky_password>
+    python proxy.py [username] [password]
 
-Then in Flight Wall settings, set Proxy URL to: http://localhost:8888
+If no arguments given, reads credentials from proxy-config.txt (one per line):
+    Line 1: username
+    Line 2: password
+
+Then set Proxy URL to http://localhost:8888 in Flight Wall settings.
 """
 import sys
+import os
 import base64
 import urllib.request
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 PORT = 8888
+
 USER = sys.argv[1] if len(sys.argv) > 2 else ""
 PASS = sys.argv[2] if len(sys.argv) > 2 else ""
 
+# Fall back to proxy-config.txt if no CLI args
+if not USER or not PASS:
+    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "proxy-config.txt")
+    if os.path.exists(config_path):
+        with open(config_path, encoding="utf-8") as f:
+            lines = [l.strip() for l in f.read().splitlines()]
+        USER = lines[0] if len(lines) > 0 else ""
+        PASS = lines[1] if len(lines) > 1 else ""
+
 if not USER or not PASS:
     print("Usage: python proxy.py <username> <password>")
+    print("  Or:  create proxy-config.txt with username on line 1, password on line 2")
     sys.exit(1)
 
 TOKEN = base64.b64encode(f"{USER}:{PASS}".encode()).decode()
-print(f"[FlightWall Proxy] Starting on http://localhost:{PORT} (auth: user={USER})")
+print(f"[FlightWall Proxy] Starting on http://localhost:{PORT} (user={USER})")
+print("[FlightWall Proxy] Running — keep this process alive or use start-proxy.vbs")
 
 
 class Handler(BaseHTTPRequestHandler):

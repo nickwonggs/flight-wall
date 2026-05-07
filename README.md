@@ -65,9 +65,35 @@ Works equally well with `chrome.exe`. Add `--start-fullscreen` if you want a tru
 - There is no backend. Requests go directly from your browser to `opensky-network.org`.
 - Geolocation, when granted, is cached locally and only used to compute the search bounding box.
 
-## v1 limitations
+## Sharing with a friend
 
-- No route data (origin / destination airports). OpenSky's free state-vectors endpoint does not provide it.
-- No aircraft type / registration enrichment beyond the ICAO24 hex.
-- No map view — the focus is a glanceable card wall.
-- Airline name lookup is a best-effort prefix table (ICAO airline codes); unknown carriers fall back to the country of registry.
+**Option 1 — send the file directly:**
+Send `flightwall.html`. That single file is the entire app. They open it locally in any browser. No proxy needed for anonymous use. For authenticated use they run `setup.bat` on their own machine.
+
+**Option 2 — host on GitHub Pages (recommended):**
+
+1. Push this repo to GitHub (or fork it).
+2. Go to repo **Settings → Pages**.
+3. Under *Source*, choose **Deploy from a branch**, select `main` / `master`, folder `/` (root), then **Save**.
+4. GitHub builds in ~30 seconds. Your wall is live at:
+   ```
+   https://<your-username>.github.io/<repo-name>/flightwall.html
+   ```
+5. Share that URL — anyone can open it in a browser, no install needed.
+
+> **Proxy note:** GitHub Pages only serves static files — it cannot run `proxy.py`. Anonymous mode (no credentials) works fine. For authenticated access, either hard-code credentials in the `OPENSKY_AUTH` constant before pushing, or tell friends to enter their own OpenSky credentials via the gear icon. Credentials are stored locally in their browser only.
+
+## Background proxy (no terminal window)
+
+1. Copy your credentials to `proxy-config.txt` (one per line — see `proxy-config.example.txt`).
+2. Double-click `start-proxy.vbs` to start the proxy silently in the background.
+3. Run `setup.bat` once to make the proxy auto-start at Windows login.
+4. In Flight Wall settings set **Proxy URL** → `http://localhost:8888`.
+
+To stop the proxy: double-click `stop-proxy.bat`.
+
+## Notes
+
+- Route origin/destination requires an OpenSky account (proxy or direct credentials) — the routes API is authenticated-only.
+- Aircraft photos are sourced from PlaneSpotters.net (public, free).
+- Callsigns are displayed in IATA format (e.g. MH370 not MAS370).

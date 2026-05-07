@@ -1,0 +1,2 @@
+your_opensky_username
+your_opensky_password
