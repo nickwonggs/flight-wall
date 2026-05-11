@@ -450,6 +450,11 @@ body {
   box-shadow: 0 0 0 1px oklch(82% 0.16 60 / 0.5) inset;
   background: oklch(82% 0.16 60 / 0.14);
 }
+.card .alliance-chip.ac-cargo {
+  color: oklch(82% 0.12 70);
+  box-shadow: 0 0 0 1px oklch(82% 0.12 70 / 0.5) inset;
+  background: oklch(82% 0.12 70 / 0.1);
+}
 .card .last-contact {
   color: var(--fg-3);
   font-size: 9.5px;
@@ -1600,9 +1605,6 @@ function buildCard(f) {
     +     '</div>'
     +     '<span class="route-iata route-to"></span>'
     +   '</div>'
-    +   '<div class="route-eta">'
-    +     '<span class="dist-val"></span>'
-    +   '</div>'
     + '</div>'
     + '<div class="stats">'
     +   '<div class="stat"><span class="stat-label">Altitude</span><span class="stat-value alt"></span></div>'
@@ -1689,6 +1691,10 @@ function updateCard(el, f, glow) {
       allianceChip.className = "alliance-chip ac-va";
       allianceChip.textContent = "Value Alliance";
       allianceChip.style.display = "";
+    } else if (CARGO_ICAO.has(prefix3)) {
+      allianceChip.className = "alliance-chip ac-cargo";
+      allianceChip.textContent = "Cargo";
+      allianceChip.style.display = "";
     } else {
       allianceChip.style.display = "none";
     }
@@ -1740,18 +1746,6 @@ function updateCard(el, f, glow) {
       el.querySelector(".route-to").textContent = airportDisplay(route.to);
       row.classList.add("show");
 
-      const distEl = el.querySelector(".dist-val");
-      const track  = el.querySelector(".route-track");
-
-      if (route.fromLat != null && route.toLat != null && f.lat != null && f.lon != null) {
-        const total     = haversineKm(route.fromLat, route.fromLon, route.toLat, route.toLon);
-        const remaining = haversineKm(f.lat, f.lon, route.toLat, route.toLon);
-        const done      = Math.max(0, Math.min(total, total - remaining));
-        const pct       = total > 0 ? Math.max(0, Math.min(100, (done / total) * 100)) : 0;
-        if (distEl) distEl.textContent = Math.round(remaining).toLocaleString() + " km left";
-      } else {
-        if (distEl) distEl.textContent = "";
-      }
     }).catch(() => {});
   }
 
