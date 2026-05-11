@@ -407,6 +407,24 @@ body {
   box-shadow: 0 0 0 0.5px oklch(78% 0.12 300 / 0.4) inset;
   background: oklch(78% 0.12 300 / 0.08);
 }
+.card .badge-star {
+  color: oklch(82% 0.16 255);
+  box-shadow: 0 0 0 1px oklch(82% 0.16 255 / 0.5) inset;
+  background: oklch(82% 0.16 255 / 0.14);
+  font-weight: 700;
+}
+.card .badge-ow {
+  color: oklch(82% 0.18 15);
+  box-shadow: 0 0 0 1px oklch(82% 0.18 15 / 0.5) inset;
+  background: oklch(82% 0.18 15 / 0.14);
+  font-weight: 700;
+}
+.card .badge-skyteam {
+  color: oklch(82% 0.16 200);
+  box-shadow: 0 0 0 1px oklch(82% 0.16 200 / 0.5) inset;
+  background: oklch(82% 0.16 200 / 0.14);
+  font-weight: 700;
+}
 .card .last-contact {
   color: var(--fg-3);
   font-size: 9.5px;
@@ -582,7 +600,7 @@ const DEFAULT_CONFIG = {
   fallbackLat: FALLBACK_LOCATION.lat,
   fallbackLon: FALLBACK_LOCATION.lon,
   pollAnonMs: 30000,
-  pollAuthMs: 20000,
+  pollAuthMs: 22000,
   openskyUser: "",
   openskyPass: "",
   proxyUrl: ""
@@ -693,7 +711,7 @@ const AIRLINES = {
   BTK: "Batik Air",
   LNI: "Lion Air",
   SJY: "Sriwijaya Air",
-  AWQ: "Wings Air",
+  AWQ: "AirAsia Indonesia",
   CTV: "Citilink",
   MNA: "Merpati Nusantara",
   SJV: "Super Air Jet",
@@ -787,7 +805,17 @@ const AIRLINES = {
   HXA: "China Express Airlines",
   DBH: "Donghai Airlines",
   AKJ: "Akasa Air",
-  UZB: "Uzbekistan Airways"
+  UZB: "Uzbekistan Airways",
+  CKK: "China Cargo Airlines",
+  DRK: "Druk Air",
+  MYU: "Myanmar Airways",
+  PAS: "Pacific Air",
+  CDG: "Cargolux Deutschland",
+  CMP: "Copa Airlines",
+  CTN: "Croatia Airlines",
+  EWG: "Eurowings",
+  AEA: "Air Europa",
+  AZA: "ITA Airways",
 };
 
 const AIRLINE_IATA = {
@@ -812,7 +840,7 @@ const AIRLINE_IATA = {
   MAU: "MK", RJA: "RJ", GFA: "GF", KAC: "KU", OMA: "WY",
   THT: "TN", FJI: "FJ", NCA: "KZ", EDW: "WK", LNI: "JT",
   CTV: "QG", NOK: "DD", KQA: "KQ",
-  AWQ: "IW", XAX: "D7", SJY: "SJ", BTK: "ID",
+  AWQ: "QZ", XAX: "D7", SJY: "SJ", BTK: "ID",
   TLM: "SL", TVJ: "VZ", FFM: "FY", MYY: "MY", BAV: "QH", BKP: "PG",
   APJ: "MM", ABL: "BX", JJA: "7C", CHH: "HU", CSZ: "ZH",
   CXA: "MF", CSC: "3U", TWB: "TW", LAO: "QV", PIC: "BL",
@@ -830,6 +858,25 @@ const AIRLINE_IATA = {
   AKJ: "QP",
   SLK: "MI", NYT: "YB", UZB: "HY",
   THD: "WE",
+  CKK: "CK", DRK: "KB", MYU: "8M", PAS: "XW", CDG: "CV",
+  CMP: "CM", CTN: "OU", EWG: "EW", AEA: "UX", AZA: "AZ",
+};
+
+const ALLIANCES = {
+  // Star Alliance
+  SIA:"SA", ACA:"SA", UAL:"SA", DLH:"SA", ANA:"SA", THY:"SA",
+  ETH:"SA", SAS:"SA", AUA:"SA", SWR:"SA", BEL:"SA",
+  ANZ:"SA", LOT:"SA", AVA:"SA", AIC:"SA", AAR:"SA", MSR:"SA",
+  AEE:"SA", CCA:"SA", EVA:"SA", TAP:"SA", SAA:"SA",
+  CMP:"SA", CTN:"SA", EWG:"SA", CSZ:"SA",
+  // Oneworld
+  AAL:"OW", BAW:"OW", CPA:"OW", FIN:"OW", IBE:"OW", JAL:"OW",
+  MAS:"OW", QFA:"OW", QTR:"OW", RAM:"OW", RJA:"OW", ALK:"OW",
+  ASA:"OW", EIN:"OW", HAL:"OW",
+  // SkyTeam
+  DAL:"ST", AFR:"ST", KLM:"ST", CES:"ST", CAL:"ST", KAL:"ST",
+  HVN:"ST", AMX:"ST", MEA:"ST", KQA:"ST", SVA:"ST",
+  ROT:"ST", CXA:"ST", AEA:"ST", AZA:"ST",
 };
 
 const AIRPORT_IATA = {
@@ -1024,7 +1071,7 @@ const AIRCRAFT_TYPES = {
   AT43:"ATR 42-300", AT45:"ATR 42-500", AT46:"ATR 42-600",
   AT72:"ATR 72-200", AT75:"ATR 72-500", AT76:"ATR 72-600",
   F100:"Fokker 100", F70:"Fokker 70", F27:"Fokker 27", F28:"Fokker 28",
-  SF34:"Saab 340", SF50:"Saab 2000", SB20:"Saab 2000",
+  SF34:"Saab 340", SF50:"Cirrus Vision Jet", SB20:"Saab 2000",
   B461:"BAe 146-100", B462:"BAe 146-200", B463:"BAe 146-300",
   RJ1H:"Avro RJ100", RJ85:"Avro RJ85",
   MD11:"McDonnell Douglas MD-11", M11F:"McDonnell Douglas MD-11F",
@@ -1053,11 +1100,16 @@ const AIRCRAFT_TYPES = {
   C56X:"Cessna Citation Excel", C560:"Cessna Citation V", C68A:"Cessna Citation Sovereign",
   C750:"Cessna Citation X", C680:"Cessna Citation Sovereign",
   EA50:"Eclipse 500",
+  TBM7:"TBM 700", TBM8:"TBM 850", TBM9:"TBM 900", TBMX:"TBM 940",
+  DA40:"Diamond DA-40", DA42:"Diamond DA-42", DA62:"Diamond DA-62",
+  SR20:"Cirrus SR20", SR22:"Cirrus SR22",
+  BE20:"Beechcraft King Air 200", BE35:"Beechcraft King Air 350",
+  P46T:"Piper M600",
 };
 
 const CARGO_ICAO = new Set([
   'FDX','UPS','GTI','CLX','NCA','AHK','GEC','DHL','SQC','CAB','MPH',
-  'BOX','PAC','ATN','ABX','CKS','TAY','KZR','SVB','SBN'
+  'BOX','PAC','ATN','ABX','CKS','TAY','KZR','SVB','SBN','CKK','CDG'
 ]);
 
 const CARGO_AC_TYPES = new Set([
@@ -1072,7 +1124,12 @@ const BIZJET_AC_TYPES = new Set([
   'H25B','H25C','H25X',
   'LJ35','LJ45','LJ60','LJ75',
   'C25A','C25B','C25C','C510','C525','C550','C56X','C560','C68A','C750','C680',
-  'EA50'
+  'EA50','SF50',
+  'TBM7','TBM8','TBM9','TBMX',
+  'DA40','DA42','DA62',
+  'SR20','SR22',
+  'BE20','BE35',
+  'P46T',
 ]);
 
 // MATH ----------------------------------------------------------------------
@@ -1100,6 +1157,25 @@ function compass(deg) {
 
 function metersToFeet(m) { return m * 3.28084; }
 function mpsToKnots(mps) { return mps * 1.94384; }
+
+function bearingRad(lat1, lon1, lat2, lon2) {
+  const toRad = d => d * Math.PI / 180;
+  const φ1 = toRad(lat1), φ2 = toRad(lat2), Δλ = toRad(lon2 - lon1);
+  return Math.atan2(
+    Math.sin(Δλ) * Math.cos(φ2),
+    Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ)
+  );
+}
+
+function alongTrackKm(pLat, pLon, fromLat, fromLon, toLat, toLon) {
+  const R = 6371;
+  const d13 = haversineKm(fromLat, fromLon, pLat, pLon) / R;
+  const θ13 = bearingRad(fromLat, fromLon, pLat, pLon);
+  const θ12 = bearingRad(fromLat, fromLon, toLat, toLon);
+  const dXt = Math.asin(Math.sin(d13) * Math.sin(θ13 - θ12));
+  const dAt = Math.acos(Math.max(-1, Math.min(1, Math.cos(d13) / Math.cos(dXt))));
+  return Math.max(0, dAt * R);
+}
 
 function interpolatePosition(lat, lon, velMps, trackDeg, elapsedSec) {
   if (velMps == null || trackDeg == null || !elapsedSec) return { lat, lon };
@@ -1149,6 +1225,7 @@ const VOICE_CALLSIGNS = {
   "FIREFLY":   { iata: "FY", airline: "Firefly" },
   "MASWINGS":  { iata: "MY", airline: "MASwings" },
   "LAOAIR":    { iata: "QV", airline: "Lao Airlines" },
+  "WAGON":     { iata: "QZ", airline: "AirAsia Indonesia" },
 };
 
 // HELPERS -------------------------------------------------------------------
@@ -1189,6 +1266,14 @@ function airlineLogoUrl(callsign) {
 function airportDisplay(icao) {
   if (!icao) return "";
   return AIRPORT_IATA[icao.toUpperCase()] || icao.toUpperCase();
+}
+
+function looksLikeRegistration(cs) {
+  if (!cs || cs.length < 4) return false;
+  const u = cs.trim().toUpperCase().replace(/\s/g, "");
+  return /^N[0-9]{1,5}[A-Z]{0,2}$/.test(u) ||    // US: N12345
+         /^[A-Z]{1,2}-[A-Z0-9]{2,5}$/.test(u) ||  // G-ABCD, VH-ABC, PK-ABC
+         /^[0-9][A-Z]-[A-Z0-9]{2,4}$/.test(u);     // 9V-SKA, 7T-VHD
 }
 
 function iataCallsign(cs) {
@@ -1401,7 +1486,11 @@ async function fetchStates() {
   console.log("[FlightWall] Response status:", resp.status);
   if (resp.status === 429) {
     state.backoffMs = Math.min(300000, Math.max(60000, state.backoffMs * 2 || 60000));
-    throw new Error("Rate limited (429)");
+    const q = getQuotaSnapshot();
+    const msg = q.count >= q.cap
+      ? "Daily quota exhausted (" + q.count + "/" + q.cap + ")"
+      : "Temporarily rate-limited – cooling down " + Math.round(state.backoffMs / 1000) + "s";
+    throw new Error(msg);
   }
   if (!resp.ok) {
     state.backoffMs = Math.min(120000, Math.max(20000, state.backoffMs * 2 || 20000));
@@ -1542,15 +1631,22 @@ function updateCard(el, f, glow) {
 
   const airline = airlineFromCallsign(f.callsign) || f.country || "—";
   el.querySelector(".airline").textContent = airline;
-  const iataCode = AIRLINE_IATA[(f.callsign || "").trim().substring(0, 3).toUpperCase()] || "";
-  el.querySelector(".icao").textContent = iataCode || (f.icao24 || "—").toUpperCase();
-
   const prefix3 = (f.callsign || "").trim().substring(0, 3).toUpperCase();
+  const iataCode = AIRLINE_IATA[prefix3] || "";
+  el.querySelector(".icao").textContent = iataCode || prefix3 || (f.icao24 || "—").toUpperCase();
+
   const badgesEl = el.querySelector(".badges");
   if (badgesEl) {
     badgesEl.innerHTML = "";
     if (CARGO_ICAO.has(prefix3)) {
       badgesEl.appendChild(span("badge badge-cargo", "Cargo"));
+    }
+    const alliance = ALLIANCES[prefix3];
+    if (alliance === "SA") badgesEl.appendChild(span("badge badge-star", "★ Star Alliance"));
+    else if (alliance === "OW") badgesEl.appendChild(span("badge badge-ow", "oneworld"));
+    else if (alliance === "ST") badgesEl.appendChild(span("badge badge-skyteam", "SkyTeam"));
+    if (!CARGO_ICAO.has(prefix3) && !AIRLINES[prefix3] && looksLikeRegistration(f.callsign)) {
+      badgesEl.appendChild(span("badge badge-bizjet", "Private"));
     }
   }
 
@@ -1613,7 +1709,9 @@ function updateCard(el, f, glow) {
         if (distEl) distEl.textContent = Math.round(remaining).toLocaleString() + " km left";
         if (etaEl && f.velocity != null && f.velocity > 5) {
           const hours = remaining / (f.velocity * 3.6);
-          etaEl.textContent = formatEta(hours) + " to " + airportDisplay(route.to);
+          const arrD = new Date(Date.now() + hours * 3600000);
+          const hhmm = arrD.getHours().toString().padStart(2, "0") + ":" + arrD.getMinutes().toString().padStart(2, "0");
+          etaEl.textContent = formatEta(hours) + " · arr " + hhmm + " → " + airportDisplay(route.to);
         } else if (etaEl) { etaEl.textContent = ""; }
       } else {
         if (track) track.style.setProperty("--progress", "0%");
@@ -1798,7 +1896,9 @@ async function pollOnce() {
     updateStatus();
   } catch (e) {
     console.error("[FlightWall] Poll error:", e);
-    updateStatus("Error: " + e.message + (state.backoffMs ? " (backoff " + Math.round(state.backoffMs / 1000) + "s)" : ""), "danger");
+    const isTemp = e.message.startsWith("Temporarily");
+    const suffix = !isTemp && state.backoffMs ? " (retry in " + Math.round(state.backoffMs / 1000) + "s)" : "";
+    updateStatus(e.message + suffix, isTemp ? "warn" : "danger");
   }
 }
 
@@ -1878,11 +1978,31 @@ function wireConfigDialog() {
 }
 
 // BOOT ----------------------------------------------------------------------
+async function probeProxy(url) {
+  const base = url.replace(/\/$/, "");
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), 3000);
+  try {
+    await fetch(base + "/api/states/all?lamin=1.35&lomin=103.8&lamax=1.36&lomax=103.81", { signal: ctrl.signal });
+    clearTimeout(tid);
+    return true;
+  } catch { clearTimeout(tid); return false; }
+}
+
 async function main() {
   state.config = loadConfig();
   wireConfigDialog();
   updateStatus("Acquiring location...");
   await acquireLocation();
+  const proxyUrl = (state.config.proxyUrl || "").trim();
+  if (proxyUrl) {
+    updateStatus("Checking proxy…");
+    const ok = await probeProxy(proxyUrl);
+    if (!ok) {
+      updateStatus("⚠ Proxy unreachable (" + proxyUrl + ") — start via start-proxy.vbs", "warn");
+      await new Promise(r => setTimeout(r, 2000));
+    }
+  }
   updateStatus("Starting...");
   startPolling();
   document.addEventListener("visibilitychange", () => {
