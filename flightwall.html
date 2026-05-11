@@ -292,7 +292,7 @@ body {
   letter-spacing: 0.04em;
   font-variant-numeric: tabular-nums;
 }
-.card .route-eta .eta-val { color: var(--accent); font-weight: 600; }
+
 
 /* Metrics */
 .card .stats {
@@ -430,6 +430,36 @@ body {
   box-shadow: 0 0 0 1px oklch(82% 0.16 60 / 0.5) inset;
   background: oklch(82% 0.16 60 / 0.14);
   font-weight: 700;
+}
+.card .alliance-chip {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 100px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.card .alliance-chip.ac-star {
+  color: oklch(82% 0.16 255);
+  box-shadow: 0 0 0 1px oklch(82% 0.16 255 / 0.5) inset;
+  background: oklch(82% 0.16 255 / 0.14);
+}
+.card .alliance-chip.ac-ow {
+  color: oklch(82% 0.18 15);
+  box-shadow: 0 0 0 1px oklch(82% 0.18 15 / 0.5) inset;
+  background: oklch(82% 0.18 15 / 0.14);
+}
+.card .alliance-chip.ac-skyteam {
+  color: oklch(82% 0.16 200);
+  box-shadow: 0 0 0 1px oklch(82% 0.16 200 / 0.5) inset;
+  background: oklch(82% 0.16 200 / 0.14);
+}
+.card .alliance-chip.ac-va {
+  color: oklch(82% 0.16 60);
+  box-shadow: 0 0 0 1px oklch(82% 0.16 60 / 0.5) inset;
+  background: oklch(82% 0.16 60 / 0.14);
 }
 .card .last-contact {
   color: var(--fg-3);
@@ -822,6 +852,8 @@ const AIRLINES = {
   EWG: "Eurowings",
   AEA: "Air Europa",
   AZA: "ITA Airways",
+  ARG: "Aerolíneas Argentinas",
+  ITA: "ITA Airways",
 };
 
 const AIRLINE_IATA = {
@@ -866,23 +898,24 @@ const AIRLINE_IATA = {
   THD: "WE",
   CKK: "CK", DRK: "KB", MYU: "8M", PAS: "XW", CDG: "CV",
   CMP: "CM", CTN: "OU", EWG: "EW", AEA: "UX", AZA: "AZ",
+  ARG: "AR", ITA: "AZ",
 };
 
 const ALLIANCES = {
-  // Star Alliance
+  // Star Alliance (source: wikipedia.org/wiki/Star_Alliance)
   SIA:"SA", ACA:"SA", UAL:"SA", DLH:"SA", ANA:"SA", THY:"SA",
-  ETH:"SA", SAS:"SA", AUA:"SA", SWR:"SA", BEL:"SA",
+  ETH:"SA", AUA:"SA", SWR:"SA", BEL:"SA", THA:"SA",
   ANZ:"SA", LOT:"SA", AVA:"SA", AIC:"SA", AAR:"SA", MSR:"SA",
   AEE:"SA", CCA:"SA", EVA:"SA", TAP:"SA", SAA:"SA",
-  CMP:"SA", CTN:"SA", EWG:"SA", CSZ:"SA",
-  // Oneworld
+  CMP:"SA", CTN:"SA", EWG:"SA", CSZ:"SA", ITA:"SA", AZA:"SA",
+  // Oneworld (source: oneworld.com)
   AAL:"OW", BAW:"OW", CPA:"OW", FIN:"OW", IBE:"OW", JAL:"OW",
   MAS:"OW", QFA:"OW", QTR:"OW", RAM:"OW", RJA:"OW", ALK:"OW",
   ASA:"OW", EIN:"OW", HAL:"OW", FJI:"OW", OMA:"OW",
-  // SkyTeam
+  // SkyTeam (source: wikipedia.org/wiki/SkyTeam)
   DAL:"ST", AFR:"ST", KLM:"ST", CES:"ST", CAL:"ST", KAL:"ST",
   HVN:"ST", AMX:"ST", MEA:"ST", KQA:"ST", SVA:"ST",
-  ROT:"ST", CXA:"ST", AEA:"ST", AZA:"ST",
+  ROT:"ST", CXA:"ST", AEA:"ST", SAS:"ST", ARG:"ST", VIR:"ST", GIA:"ST",
   // Value Alliance
   CEB:"VA", JJA:"VA", NOK:"VA", TGW:"VA",
 };
@@ -1041,7 +1074,6 @@ const COUNTRY_FLAGS = {
 const routesCache     = new Map();
 const photoCache      = new Map();
 const acInfoCache     = new Map();
-const flightDataCache = new Map();
 
 const state = {
   userLat: null,
@@ -1328,14 +1360,6 @@ async function fetchRoute(callsign) {
   return promise;
 }
 
-function formatEta(hours) {
-  if (!isFinite(hours) || hours < 0) return "";
-  if (hours < 1/60) return "<1m";
-  if (hours < 1) return Math.round(hours * 60) + "m";
-  const h = Math.floor(hours);
-  const m = Math.round((hours - h) * 60);
-  return m === 0 ? h + "h" : h + "h " + m + "m";
-}
 
 async function fetchAircraftPhoto(icao24) {
   const hex = icao24.toLowerCase();
@@ -1374,33 +1398,6 @@ async function fetchAircraftInfo(icao24) {
   return promise;
 }
 
-async function fetchFlightDeparture(icao24) {
-  const hex = icao24.toLowerCase();
-  const cached = flightDataCache.get(hex);
-  if (cached) return cached;
-  const promise = (async () => {
-    const auth = getActiveAuth();
-    if (!auth.user) return null;
-    const cfg = state.config;
-    const proxyBase = (cfg.proxyUrl || "").replace(/\/$/, "");
-    const base = proxyBase || "https://opensky-network.org";
-    const now = Math.floor(Date.now() / 1000);
-    const url = base + "/api/flights/aircraft?icao24=" + hex + "&begin=" + (now - 86400) + "&end=" + now;
-    const headers = {};
-    if (auth.user && !proxyBase) headers["Authorization"] = "Basic " + btoa(auth.user + ":" + auth.pass);
-    try {
-      const resp = await fetch(url, { headers });
-      if (!resp.ok) return null;
-      const data = await resp.json();
-      if (!Array.isArray(data) || !data.length) return null;
-      const latest = data[data.length - 1];
-      return latest.firstSeen ? { firstSeen: latest.firstSeen } : null;
-    } catch { return null; }
-  })();
-  flightDataCache.set(hex, promise);
-  setTimeout(() => flightDataCache.delete(hex), 30 * 60 * 1000);
-  return promise;
-}
 
 function relativeTime(unixSec) {
   if (!unixSec) return "—";
@@ -1593,7 +1590,10 @@ function buildCard(f) {
     +   '</div>'
     + '</div>'
     + '<div class="header">'
-    +   '<div class="airline"></div>'
+    +   '<div style="display:flex;align-items:center;gap:6px">'
+    +     '<div class="airline"></div>'
+    +     '<span class="alliance-chip" style="display:none"></span>'
+    +   '</div>'
     +   '<div class="callsign-row">'
     +     '<img class="header-logo" src="" alt="" loading="lazy" style="display:none" onerror="this.style.display=\'none\'">'
     +     '<div class="callsign"></div>'
@@ -1614,7 +1614,6 @@ function buildCard(f) {
     +   '</div>'
     +   '<div class="route-eta">'
     +     '<span class="dist-val"></span>'
-    +     '<span class="eta-val"></span>'
     +   '</div>'
     + '</div>'
     + '<div class="stats">'
@@ -1678,13 +1677,32 @@ function updateCard(el, f, glow) {
     if (CARGO_ICAO.has(prefix3)) {
       badgesEl.appendChild(span("badge badge-cargo", "Cargo"));
     }
-    const alliance = ALLIANCES[prefix3];
-    if (alliance === "SA") badgesEl.appendChild(span("badge badge-star", "★ Star Alliance"));
-    else if (alliance === "OW") badgesEl.appendChild(span("badge badge-ow", "oneworld"));
-    else if (alliance === "ST") badgesEl.appendChild(span("badge badge-skyteam", "SkyTeam"));
-    else if (alliance === "VA") badgesEl.appendChild(span("badge badge-va", "Value Alliance"));
     if (!CARGO_ICAO.has(prefix3) && !AIRLINES[prefix3] && looksLikeRegistration(f.callsign)) {
       badgesEl.appendChild(span("badge badge-bizjet", "Private"));
+    }
+  }
+
+  const allianceChip = el.querySelector(".alliance-chip");
+  if (allianceChip) {
+    const alliance = ALLIANCES[prefix3];
+    if (alliance === "SA") {
+      allianceChip.className = "alliance-chip ac-star";
+      allianceChip.textContent = "★ Star Alliance";
+      allianceChip.style.display = "";
+    } else if (alliance === "OW") {
+      allianceChip.className = "alliance-chip ac-ow";
+      allianceChip.textContent = "oneworld";
+      allianceChip.style.display = "";
+    } else if (alliance === "ST") {
+      allianceChip.className = "alliance-chip ac-skyteam";
+      allianceChip.textContent = "SkyTeam";
+      allianceChip.style.display = "";
+    } else if (alliance === "VA") {
+      allianceChip.className = "alliance-chip ac-va";
+      allianceChip.textContent = "Value Alliance";
+      allianceChip.style.display = "";
+    } else {
+      allianceChip.style.display = "none";
     }
   }
 
@@ -1735,7 +1753,6 @@ function updateCard(el, f, glow) {
       row.classList.add("show");
 
       const distEl = el.querySelector(".dist-val");
-      const etaEl  = el.querySelector(".eta-val");
       const track  = el.querySelector(".route-track");
 
       if (route.fromLat != null && route.toLat != null && f.lat != null && f.lon != null) {
@@ -1745,28 +1762,9 @@ function updateCard(el, f, glow) {
         const pct       = total > 0 ? Math.max(0, Math.min(100, (done / total) * 100)) : 0;
         if (track) track.style.setProperty("--progress", pct.toFixed(1) + "%");
         if (distEl) distEl.textContent = Math.round(remaining).toLocaleString() + " km left";
-        const setEta = (hrs) => {
-          if (!el.isConnected || !etaEl) return;
-          const a = new Date(Date.now() + hrs * 3600000);
-          const t = a.getHours().toString().padStart(2, "0") + ":" + a.getMinutes().toString().padStart(2, "0");
-          etaEl.textContent = formatEta(hrs) + " · arr " + t + " → " + airportDisplay(route.to);
-        };
-        if (etaEl && f.velocity != null && f.velocity > 50) {
-          setEta(remaining / (f.velocity * 3.6));
-          fetchFlightDeparture(f.icao24).then(dep => {
-            if (!dep || !el.isConnected) return;
-            const elapsedH = (Date.now() / 1000 - dep.firstSeen) / 3600;
-            const covered = total - remaining;
-            if (elapsedH < 0.1 || covered < 200) return;
-            const avgKmh = covered / elapsedH;
-            if (avgKmh < 300 || avgKmh > 1400) return;
-            setEta(remaining / avgKmh);
-          }).catch(() => {});
-        } else if (etaEl) { etaEl.textContent = ""; }
       } else {
         if (track) track.style.setProperty("--progress", "0%");
         if (distEl) distEl.textContent = "";
-        if (etaEl)  etaEl.textContent = "";
       }
     }).catch(() => {});
   }
