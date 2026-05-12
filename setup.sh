@@ -19,6 +19,10 @@ if ! command -v python3 &>/dev/null; then
 fi
 echo "[OK] $(python3 --version)"
 
+# Fix execute permissions on .command files (lost when unzipped on macOS)
+chmod +x "$SCRIPT_DIR/start-proxy.command" "$SCRIPT_DIR/stop-proxy.command" 2>/dev/null
+echo "[OK] Execute permissions set on .command files"
+
 # Collect credentials
 echo ""
 echo "Enter your OpenSky Network credentials."

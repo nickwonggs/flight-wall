@@ -162,7 +162,19 @@ You will see `Setup complete!` when it finishes. You can now close Terminal.
 
 In the `flight-wall-main` folder, find the file **`start-proxy.command`**.
 
-> **First time only:** macOS will block it. Use Method A or Method B from the **Mac security warning** section at the top of this guide. After you do it once, double-clicking will work normally.
+> **First time only — two things to handle:**
+>
+> 1. **"Cannot be executed — you do not have appropriate access privileges"**
+>    The file is missing execute permission after being unzipped. Running `bash setup.sh` (Step 4) fixes this automatically. If you skipped setup, open Terminal, navigate to the folder (Step 2), and run:
+>    ```
+>    chmod +x start-proxy.command stop-proxy.command
+>    ```
+>    Then try double-clicking again.
+>
+> 2. **Mac security warning ("cannot be opened / unidentified developer")**
+>    Use Method A or Method B from the **Mac security warning** section at the top of this guide.
+>
+> After handling both once, double-clicking will work normally.
 
 A Terminal window will open briefly and show:
 ```
@@ -200,6 +212,7 @@ Double-click **`stop-proxy.command`** in the flight-wall folder.
 | **Cards are dimmed / yellow** | The aircraft hasn't reported a position for 60+ seconds. It will disappear automatically on the next API refresh. |
 | **Always shows Singapore** | Location access was denied. In your browser, click the padlock icon next to the address bar, find **Location**, and change it to **Allow**. Then reload the page. |
 | **"cannot be opened" / security warning on any file** | See the **Mac security warning** section at the top of this guide — Method A (right-click → Open → Open) or Method B (System Settings → Privacy & Security → Open Anyway). |
+| **"cannot be executed — you do not have appropriate access privileges"** | The file is missing execute permission. Open Terminal, navigate to the folder (Part 3 Step 2), and run: `chmod +x start-proxy.command stop-proxy.command` — then double-click again. Running `bash setup.sh` also fixes this automatically. |
 | **`bash setup.sh` says "Permission denied"** | Type `chmod +x setup.sh` and press Return, then run `bash setup.sh` again. |
 | **Proxy shows "failed to start"** | Open the file `proxy.log` in the flight-wall folder with TextEdit to see the error message. Most commonly Python is missing — see Part 3, Step 3. |
 
