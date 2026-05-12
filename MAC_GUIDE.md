@@ -4,6 +4,41 @@ This guide is written for someone who has never opened Terminal before. Follow t
 
 ---
 
+## Important first — Mac security warning
+
+When you download files from the internet, macOS marks them as "untrusted" and may refuse to open them. You will likely see a message like:
+
+> *"flightwall.html cannot be opened because it is from an unidentified developer"*
+> or
+> *"macOS cannot verify that this app is free from malware"*
+
+**This is normal and expected for downloaded files. The Flight Wall files are safe.**
+
+### How to bypass the warning — Method A (right-click trick, fastest)
+
+1. **Right-click** (or hold **Control** and click) the file.
+2. Click **Open** in the menu that appears.
+3. A dialog box appears — click **Open** again.
+
+That's it. You only need to do this once per file. After that, double-clicking works normally.
+
+### How to bypass the warning — Method B (System Settings, if Method A doesn't work)
+
+1. Try to open the file normally (double-click). It will be blocked.
+2. Open **System Settings** (the grey gear icon in your Dock, or Apple menu → System Settings).
+3. Click **Privacy & Security** in the left sidebar.
+4. Scroll down. Near the bottom you will see a message:
+   > *"flightwall.html was blocked from use because it is not from an identified developer."*
+5. Click **Open Anyway**.
+6. Enter your Mac password if prompted.
+7. Click **Open Anyway** one more time in the confirmation dialog.
+
+> **Which files need this treatment?** Any file from this project that you try to open by double-clicking: `flightwall.html`, `start-proxy.command`, `stop-proxy.command`. You only need to do it once per file.
+
+---
+
+---
+
 ## Part 1 — Basic setup (no Terminal required)
 
 ### Step 1 — Download the files
@@ -127,12 +162,7 @@ You will see `Setup complete!` when it finishes. You can now close Terminal.
 
 In the `flight-wall-main` folder, find the file **`start-proxy.command`**.
 
-**First time only — Mac security prompt:**
-1. Right-click (or Control-click) `start-proxy.command`.
-2. Click **Open**.
-3. A dialog will say *"macOS cannot verify the developer…"* — click **Open** again.
-
-From now on you can just double-click it.
+> **First time only:** macOS will block it. Use Method A or Method B from the **Mac security warning** section at the top of this guide. After you do it once, double-clicking will work normally.
 
 A Terminal window will open briefly and show:
 ```
@@ -157,7 +187,7 @@ Route origin/destination data will now appear on flight cards.
 
 Double-click **`stop-proxy.command`** in the flight-wall folder.
 
-> Same first-time security step as above: right-click → Open → Open.
+> Same first-time security step applies: see the **Mac security warning** section at the top.
 
 ---
 
@@ -169,7 +199,7 @@ Double-click **`stop-proxy.command`** in the flight-wall folder.
 | **"Rate limited (429)"** | You've hit OpenSky's daily request cap. Add credentials in the gear icon settings, or wait until midnight UTC for the counter to reset. |
 | **Cards are dimmed / yellow** | The aircraft hasn't reported a position for 60+ seconds. It will disappear automatically on the next API refresh. |
 | **Always shows Singapore** | Location access was denied. In your browser, click the padlock icon next to the address bar, find **Location**, and change it to **Allow**. Then reload the page. |
-| **`start-proxy.command` won't open** | Right-click it → Open → Open (the Mac security bypass described in Part 3, Step 5). |
+| **"cannot be opened" / security warning on any file** | See the **Mac security warning** section at the top of this guide — Method A (right-click → Open → Open) or Method B (System Settings → Privacy & Security → Open Anyway). |
 | **`bash setup.sh` says "Permission denied"** | Type `chmod +x setup.sh` and press Return, then run `bash setup.sh` again. |
 | **Proxy shows "failed to start"** | Open the file `proxy.log` in the flight-wall folder with TextEdit to see the error message. Most commonly Python is missing — see Part 3, Step 3. |
 
