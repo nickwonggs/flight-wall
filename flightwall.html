@@ -1369,7 +1369,11 @@ async function fetchAircraftPhoto(icao24) {
   if (photoCache.has(hex)) return photoCache.get(hex);
   const promise = (async () => {
     try {
-      const resp = await fetch("https://api.planespotters.net/pub/photos/hex/" + hex);
+      const proxyBase = (state.config && state.config.proxyUrl || "").replace(/\/$/, "");
+      const apiUrl = proxyBase
+        ? proxyBase + "/planespotters/pub/photos/hex/" + hex
+        : "https://api.planespotters.net/pub/photos/hex/" + hex;
+      const resp = await fetch(apiUrl, { referrerPolicy: "no-referrer" });
       if (!resp.ok) return { url: null };
       const json = await resp.json();
       const p = json.photos && json.photos[0];

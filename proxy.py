@@ -52,8 +52,12 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        target = "https://opensky-network.org" + self.path
-        req = urllib.request.Request(target, headers={"Authorization": f"Basic {TOKEN}"})
+        if self.path.startswith("/planespotters/"):
+            target = "https://api.planespotters.net" + self.path[len("/planespotters"):]
+            req = urllib.request.Request(target)
+        else:
+            target = "https://opensky-network.org" + self.path
+            req = urllib.request.Request(target, headers={"Authorization": f"Basic {TOKEN}"})
         try:
             with urllib.request.urlopen(req, timeout=15) as resp:
                 data = resp.read()
