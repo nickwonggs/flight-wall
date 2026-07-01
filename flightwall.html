@@ -1374,15 +1374,27 @@ async function fetchAircraftPhoto(icao24) {
         ? proxyBase + "/planespotters/pub/photos/hex/" + hex
         : "https://api.planespotters.net/pub/photos/hex/" + hex;
       const resp = await fetch(apiUrl, { referrerPolicy: "no-referrer" });
-      if (!resp.ok) return { url: null };
+      if (!resp.ok) {
+        console.warn("[FlightWall] photo API", resp.status, "for", hex);
+        return { url: null };
+      }
       const json = await resp.json();
       const p = json.photos && json.photos[0];
-      if (!p) return { url: null };
+      if (!p) {
+        console.warn("[FlightWall] no photos in response for", hex, json);
+        return { url: null };
+      }
       const url = (p.thumbnail_large && p.thumbnail_large.src) || (p.thumbnail && p.thumbnail.src) || null;
+      if (!url) console.warn("[FlightWall] no thumbnail src for", hex, p);
       return { url };
-    } catch { return { url: null }; }
+    } catch (e) {
+      console.warn("[FlightWall] photo fetch error for", hex, e.message);
+      return { url: null };
+    }
   })();
   photoCache.set(hex, promise);
+  // Don't permanently cache failures — retry on next poll
+  promise.then(({ url }) => { if (!url) photoCache.delete(hex); });
   return promise;
 }
 
@@ -1806,7 +1818,7 @@ function updateCard(el, f, glow) {
         const showPhoto = () => { img.style.display = "block"; if (ph) ph.style.display = "none"; };
         const hidePhoto = () => { img.style.display = "none"; if (ph) ph.style.display = ""; };
         img.onload = showPhoto;
-        img.onerror = hidePhoto;
+        img.onerror = () => { console.warn("[FlightWall] photo img failed to load:", url); hidePhoto(); };
         img.src = url;
         if (img.complete && img.naturalWidth > 0) showPhoto();
       }
