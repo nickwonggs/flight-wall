@@ -1088,8 +1088,14 @@ const state = {
   requestsToday: 0,
   lastFetch: 0,
   polling: false,
+  autoProxy: "",          // proxy auto-detected at localhost:8888 (photos)
   config: { ...DEFAULT_CONFIG }
 };
+
+// Proxy base for photo requests: explicit setting wins, else auto-detected.
+function photoProxyBase() {
+  return ((state.config.proxyUrl || state.autoProxy || "").trim()).replace(/\/$/, "");
+}
 
 const AIRCRAFT_TYPES = {
   B732:"Boeing 737-200", B733:"Boeing 737-300", B734:"Boeing 737-400", B735:"Boeing 737-500",
@@ -1369,7 +1375,7 @@ async function fetchAircraftPhoto(icao24) {
   if (photoCache.has(hex)) return photoCache.get(hex);
   const promise = (async () => {
     try {
-      const proxyBase = (state.config && state.config.proxyUrl || "").replace(/\/$/, "");
+      const proxyBase = photoProxyBase();
       const apiUrl = proxyBase
         ? proxyBase + "/planespotters/pub/photos/hex/" + hex
         : "https://api.planespotters.net/pub/photos/hex/" + hex;
@@ -2069,6 +2075,17 @@ async function main() {
     if (!ok) {
       updateStatus("⚠ Proxy unreachable (" + proxyUrl + ") — start via start-proxy.vbs", "warn");
       await new Promise(r => setTimeout(r, 2000));
+    }
+  } else {
+    // No proxy configured — auto-detect one at localhost:8888 so photos
+    // work as soon as start-proxy is running, with no manual setup.
+    const ok = await probeProxy("http://localhost:8888");
+    if (ok) {
+      state.autoProxy = "http://localhost:8888";
+      photoCache.clear();
+      console.log("[FlightWall] Auto-detected proxy at localhost:8888 — photos enabled");
+    } else {
+      console.log("[FlightWall] No proxy detected. Aircraft photos need the proxy running (start-proxy).");
     }
   }
   updateStatus("Starting...");
