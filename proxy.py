@@ -25,6 +25,8 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 
 PORT = 8765
 _UA = "Mozilla/5.0 (compatible; FlightWall/1.0)"
+# PlaneSpotters requires a User-Agent that includes a contact URL or email.
+_PS_UA = "FlightWall/1.0 (+https://github.com/nickwonggs/flight-wall)"
 
 USER = sys.argv[1] if len(sys.argv) > 2 else ""
 PASS = sys.argv[2] if len(sys.argv) > 2 else ""
@@ -62,7 +64,7 @@ class Handler(BaseHTTPRequestHandler):
         if self.path.startswith("/planespotters/"):
             target = "https://api.planespotters.net" + self.path[len("/planespotters"):]
             req = urllib.request.Request(target, headers={
-                "User-Agent": _UA,
+                "User-Agent": _PS_UA,
                 "Referer": "https://www.planespotters.net/",
                 "Accept": "application/json",
             })
