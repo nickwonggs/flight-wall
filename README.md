@@ -88,7 +88,7 @@ Send `flightwall.html`. That single file is the entire app. They open it locally
 1. Copy your credentials to `proxy-config.txt` (one per line — see `proxy-config.example.txt`).
 2. Double-click `start-proxy.vbs` to start the proxy silently in the background.
 3. Run `setup.bat` once to make the proxy auto-start at Windows login.
-4. In Flight Wall settings set **Proxy URL** → `http://localhost:8888`.
+4. In Flight Wall settings set **Proxy URL** → `http://localhost:8765`.
 
 To stop the proxy: double-click `stop-proxy.bat`.
 

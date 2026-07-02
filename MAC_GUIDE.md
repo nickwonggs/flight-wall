@@ -37,8 +37,6 @@ That's it. You only need to do this once per file. After that, double-clicking w
 
 ---
 
----
-
 ## Part 1 — Basic setup (no Terminal required)
 
 ### Step 1 — Download the files
@@ -183,7 +181,7 @@ A Terminal window will open briefly and show:
   ✓ Flight Wall proxy is running.
 
   In Flight Wall settings (gear icon),
-  set Proxy URL to:  http://localhost:8888
+  set Proxy URL to:  http://localhost:8765
 ```
 You can close that window — the proxy keeps running in the background.
 
@@ -192,7 +190,7 @@ You can close that window — the proxy keeps running in the background.
 1. Open `flightwall.html` in your browser (or reload it if already open).
 2. Click the **gear icon** (⚙) in the top-right corner.
 3. Find the **Proxy URL** field.
-4. Type: `http://localhost:8888`
+4. Type: `http://localhost:8765`
 5. Click **Save**.
 
 Route origin/destination data will now appear on flight cards.
@@ -228,4 +226,4 @@ Double-click **`stop-proxy.command`** in the flight-wall folder.
 | Change radius / max cards | Gear icon ⚙ → adjust → Save |
 | Start proxy | Double-click `start-proxy.command` |
 | Stop proxy | Double-click `stop-proxy.command` |
-| Check proxy is running | Open a browser tab and go to `http://localhost:8888` — you should see a short JSON response |
+| Check proxy is running | Open a browser tab and go to `http://localhost:8765` — you should see a short JSON response |

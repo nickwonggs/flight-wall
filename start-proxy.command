@@ -11,7 +11,7 @@ if [ -f "$PIDFILE" ]; then
     kill "$(cat "$PIDFILE")" 2>/dev/null
     rm -f "$PIDFILE"
 fi
-lsof -ti :8888 | xargs kill -9 2>/dev/null
+lsof -ti :8765 | xargs kill -9 2>/dev/null
 
 # Warn if no credentials, but allow proxy to start (photos work without them)
 if [ ! -f "$SCRIPT_DIR/proxy-config.txt" ]; then
@@ -32,7 +32,7 @@ if kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
     echo "  ✓ Flight Wall proxy is running."
     echo ""
     echo "  In Flight Wall settings (gear icon),"
-    echo "  set Proxy URL to:  http://localhost:8888"
+    echo "  set Proxy URL to:  http://localhost:8765"
     echo ""
     echo "  This enables aircraft photos and (with credentials) authenticated"
     echo "  OpenSky access. You can close this window — proxy runs in background."

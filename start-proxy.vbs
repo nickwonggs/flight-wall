@@ -1,28 +1,33 @@
-Dim oShell, strDir
+' Double-click to start the Flight Wall proxy silently on Windows.
+' No console window appears (pythonw). Photos work without credentials;
+' add OpenSky credentials to proxy-config.txt for higher rate limits.
+Dim oShell, strDir, oFS
 Set oShell = CreateObject("WScript.Shell")
+Set oFS = CreateObject("Scripting.FileSystemObject")
 strDir = Left(WScript.ScriptFullName, InStrRev(WScript.ScriptFullName, "\"))
 
-' Check proxy-config.txt exists
-Dim oFS
-Set oFS = CreateObject("Scripting.FileSystemObject")
-If Not oFS.FileExists(strDir & "proxy-config.txt") Then
-    MsgBox "proxy-config.txt not found." & vbCrLf & vbCrLf & _
-           "Create it in the flight-wall folder with:" & vbCrLf & _
-           "Line 1: your OpenSky username" & vbCrLf & _
-           "Line 2: your OpenSky password", _
-           vbExclamation, "Flight Wall Proxy"
-    WScript.Quit
-End If
+Dim proxyPort
+proxyPort = "8765"
 
-' Kill any existing proxy on port 8888
-oShell.Run "cmd /c taskkill /f /fi ""WINDOWTITLE eq FlightWallProxy*"" >nul 2>&1", 0, True
+' Kill any existing proxy listening on the proxy port (by PID from netstat),
+' so an updated proxy.py actually takes over. Killing by window title does
+' not work for pythonw (it has no window).
+oShell.Run "cmd /c for /f ""tokens=5"" %a in ('netstat -aon ^| findstr "":" & proxyPort & " "" ^| findstr LISTENING') do taskkill /f /pid %a >nul 2>&1", 0, True
 
 ' Start proxy hidden (pythonw = no console window)
 oShell.Run "pythonw """ & strDir & "proxy.py""", 0, False
 
-WScript.Sleep 1200
+WScript.Sleep 1500
 
-MsgBox "Flight Wall proxy started silently." & vbCrLf & vbCrLf & _
-       "Set Proxy URL to: http://localhost:8888" & vbCrLf & _
-       "in the Flight Wall settings (gear icon).", _
-       vbInformation, "Flight Wall Proxy"
+Dim msg
+msg = "Flight Wall proxy started on http://localhost:" & proxyPort & vbCrLf & vbCrLf
+If oFS.FileExists(strDir & "proxy-config.txt") Then
+    msg = msg & "OpenSky credentials loaded (authenticated mode)." & vbCrLf & vbCrLf
+Else
+    msg = msg & "Running in anonymous mode — aircraft photos will work." & vbCrLf & _
+          "Run setup.bat to add OpenSky credentials for higher rate limits." & vbCrLf & vbCrLf
+End If
+msg = msg & "In Flight Wall, photos auto-connect to the proxy — no settings" & vbCrLf & _
+      "change needed. (Advanced: Proxy URL is http://localhost:" & proxyPort & ")"
+
+MsgBox msg, vbInformation, "Flight Wall Proxy"

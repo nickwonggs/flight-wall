@@ -15,8 +15,8 @@ if [ -f "$PIDFILE" ]; then
     rm -f "$PIDFILE"
 fi
 
-# Also sweep port 8888 in case pidfile is stale
-PIDS=$(lsof -ti :8888 2>/dev/null)
+# Also sweep port 8765 in case pidfile is stale
+PIDS=$(lsof -ti :8765 2>/dev/null)
 if [ -n "$PIDS" ]; then
     echo "$PIDS" | xargs kill -9 2>/dev/null
     STOPPED=1

@@ -13,7 +13,9 @@ Credentials are optional — the proxy starts in anonymous mode if none are
 provided. Photos will work either way; authenticated OpenSky gives higher
 rate limits (~4 000 req/day vs 400).
 
-Then set Proxy URL to http://localhost:8888 in Flight Wall settings.
+Then set Proxy URL to http://localhost:8765 in Flight Wall settings.
+(Port 8765 is used instead of 8888 to avoid clashing with Fiddler and other
+tools that commonly occupy 8888.)
 """
 import sys
 import os
@@ -21,7 +23,7 @@ import base64
 import urllib.request
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-PORT = 8888
+PORT = 8765
 _UA = "Mozilla/5.0 (compatible; FlightWall/1.0)"
 
 USER = sys.argv[1] if len(sys.argv) > 2 else ""
@@ -42,7 +44,7 @@ if USER and PASS:
 else:
     print(f"[FlightWall Proxy] Starting on http://localhost:{PORT} (anonymous — photos only)")
     print("[FlightWall Proxy] Add OpenSky credentials to proxy-config.txt for higher rate limits")
-print("[FlightWall Proxy] Running — keep this process alive or use start-proxy.command")
+print("[FlightWall Proxy] Running — keep this process alive or use start-proxy.vbs")
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -79,10 +81,21 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(data)
         except urllib.error.HTTPError as e:
+            # Relay the upstream status AND body so failures are diagnosable
+            # in the browser / console instead of showing a blank 403 page.
+            body = b""
+            try:
+                body = e.read()
+            except Exception:
+                pass
+            print(f"[proxy] upstream {e.code} for {target} :: {body[:200]!r}")
             self.send_response(e.code)
+            self.send_header("Content-Type", "application/json")
             self._cors()
             self.end_headers()
+            self.wfile.write(body)
         except Exception as e:
+            print(f"[proxy] error for {target} :: {e}")
             self.send_response(502)
             self._cors()
             self.end_headers()
@@ -92,4 +105,10 @@ class Handler(BaseHTTPRequestHandler):
         print(f"[proxy] {args[0]} {args[1]}")
 
 
-HTTPServer(("localhost", PORT), Handler).serve_forever()
+try:
+    HTTPServer(("localhost", PORT), Handler).serve_forever()
+except OSError as e:
+    print(f"[FlightWall Proxy] ERROR: could not bind port {PORT} — {e}")
+    print(f"[FlightWall Proxy] Another program may be using port {PORT}. "
+          "Stop it, or change PORT at the top of proxy.py.")
+    sys.exit(1)

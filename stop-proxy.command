@@ -14,7 +14,7 @@ if [ -f "$PIDFILE" ]; then
     rm -f "$PIDFILE"
 fi
 
-PIDS=$(lsof -ti :8888 2>/dev/null)
+PIDS=$(lsof -ti :8765 2>/dev/null)
 if [ -n "$PIDS" ]; then
     echo "$PIDS" | xargs kill -9 2>/dev/null
     STOPPED=1

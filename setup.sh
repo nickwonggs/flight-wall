@@ -76,7 +76,7 @@ echo "Next steps:"
 echo "  1. Open flightwall.html in your browser"
 echo "  2. Click the gear icon (top-right)"
 if [ -n "$OSUSER" ]; then
-    echo "  3. Set Proxy URL to: http://localhost:8888"
+    echo "  3. Set Proxy URL to: http://localhost:8765"
     echo "  4. Run ./start-proxy.sh to start the proxy now"
 else
     echo "  3. Enter credentials when you have an OpenSky account"

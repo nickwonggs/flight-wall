@@ -12,8 +12,8 @@ if [ -f "$PIDFILE" ]; then
     rm -f "$PIDFILE"
 fi
 
-# Also kill anything on port 8888
-lsof -ti :8888 | xargs kill -9 2>/dev/null
+# Also kill anything on port 8765
+lsof -ti :8765 | xargs kill -9 2>/dev/null
 
 # Start proxy
 nohup python3 "$SCRIPT_DIR/proxy.py" >> "$LOGFILE" 2>&1 &
@@ -23,7 +23,7 @@ echo $PROXY_PID > "$PIDFILE"
 sleep 0.8
 if kill -0 "$PROXY_PID" 2>/dev/null; then
     echo "Flight Wall proxy started (PID $PROXY_PID)"
-    echo "Proxy URL: http://localhost:8888"
+    echo "Proxy URL: http://localhost:8765"
     echo "Log: $LOGFILE"
 else
     echo "[ERROR] Proxy failed to start. Check $LOGFILE"

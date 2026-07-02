@@ -614,9 +614,9 @@ body {
       <input type="password" name="openskyPass" autocomplete="off">
     </label>
     <label>Proxy URL (optional)
-      <input type="text" name="proxyUrl" autocomplete="off" spellcheck="false" placeholder="http://localhost:8888">
+      <input type="text" name="proxyUrl" autocomplete="off" spellcheck="false" placeholder="http://localhost:8765">
     </label>
-    <p class="hint">Free account at <a href="https://opensky-network.org" target="_blank" style="color:var(--accent)">opensky-network.org</a> gives 4,000 requests/day (vs 400 anonymous). Credentials stored only in your browser.<br><br><strong>No-terminal proxy:</strong> double-click <code>start-proxy.vbs</code> to run the proxy silently in the background, then set Proxy URL to <code>http://localhost:8888</code>. To auto-start on login, run <code>setup.bat</code> once.</p>
+    <p class="hint">Free account at <a href="https://opensky-network.org" target="_blank" style="color:var(--accent)">opensky-network.org</a> gives 4,000 requests/day (vs 400 anonymous). Credentials stored only in your browser.<br><br><strong>Photos &amp; no-terminal proxy:</strong> double-click <code>start-proxy.vbs</code> (Windows) or <code>start-proxy.command</code> (Mac) to run the proxy silently. Photos then auto-connect — no need to fill this in. (Advanced: proxy runs at <code>http://localhost:8765</code>.) To auto-start on login, run <code>setup.bat</code> / <code>setup.sh</code> once.</p>
     <div class="actions">
       <button type="button" id="cfg-cancel">Cancel</button>
       <button type="submit" class="primary" id="cfg-save">Save</button>
@@ -1088,7 +1088,7 @@ const state = {
   requestsToday: 0,
   lastFetch: 0,
   polling: false,
-  autoProxy: "",          // proxy auto-detected at localhost:8888 (photos)
+  autoProxy: "",          // proxy auto-detected at localhost:8765 (photos)
   config: { ...DEFAULT_CONFIG }
 };
 
@@ -2077,14 +2077,18 @@ async function main() {
       await new Promise(r => setTimeout(r, 2000));
     }
   } else {
-    // No proxy configured — auto-detect one at localhost:8888 so photos
-    // work as soon as start-proxy is running, with no manual setup.
-    const ok = await probeProxy("http://localhost:8888");
-    if (ok) {
-      state.autoProxy = "http://localhost:8888";
-      photoCache.clear();
-      console.log("[FlightWall] Auto-detected proxy at localhost:8888 — photos enabled");
-    } else {
+    // No proxy configured — auto-detect one so photos work as soon as
+    // start-proxy is running, with no manual setup. Try the current port
+    // (8765) first, then the legacy 8888 for older installs.
+    for (const cand of ["http://localhost:8765", "http://localhost:8888"]) {
+      if (await probeProxy(cand)) {
+        state.autoProxy = cand;
+        photoCache.clear();
+        console.log("[FlightWall] Auto-detected proxy at " + cand + " — photos enabled");
+        break;
+      }
+    }
+    if (!state.autoProxy) {
       console.log("[FlightWall] No proxy detected. Aircraft photos need the proxy running (start-proxy).");
     }
   }
