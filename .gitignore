@@ -14,3 +14,6 @@ Thumbs.db
 proxy-config.txt
 proxy.log
 .proxy.pid
+
+__pycache__/
+*.pyc
