@@ -1,5 +1,6 @@
 """
-Flight Wall local proxy — bypasses OpenSky CORS restrictions for authenticated requests.
+Flight Wall local proxy — fixes CORS for PlaneSpotters photos and adds
+authentication for OpenSky Network API requests.
 
 Usage:
     python proxy.py [username] [password]
@@ -7,6 +8,10 @@ Usage:
 If no arguments given, reads credentials from proxy-config.txt (one per line):
     Line 1: username
     Line 2: password
+
+Credentials are optional — the proxy starts in anonymous mode if none are
+provided. Photos will work either way; authenticated OpenSky gives higher
+rate limits (~4 000 req/day vs 400).
 
 Then set Proxy URL to http://localhost:8888 in Flight Wall settings.
 """
@@ -17,6 +22,7 @@ import urllib.request
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 PORT = 8888
+_UA = "Mozilla/5.0 (compatible; FlightWall/1.0)"
 
 USER = sys.argv[1] if len(sys.argv) > 2 else ""
 PASS = sys.argv[2] if len(sys.argv) > 2 else ""
@@ -30,14 +36,13 @@ if not USER or not PASS:
         USER = lines[0] if len(lines) > 0 else ""
         PASS = lines[1] if len(lines) > 1 else ""
 
-if not USER or not PASS:
-    print("Usage: python proxy.py <username> <password>")
-    print("  Or:  create proxy-config.txt with username on line 1, password on line 2")
-    sys.exit(1)
-
-TOKEN = base64.b64encode(f"{USER}:{PASS}".encode()).decode()
-print(f"[FlightWall Proxy] Starting on http://localhost:{PORT} (user={USER})")
-print("[FlightWall Proxy] Running — keep this process alive or use start-proxy.vbs")
+TOKEN = base64.b64encode(f"{USER}:{PASS}".encode()).decode() if USER and PASS else ""
+if USER and PASS:
+    print(f"[FlightWall Proxy] Starting on http://localhost:{PORT} (user={USER})")
+else:
+    print(f"[FlightWall Proxy] Starting on http://localhost:{PORT} (anonymous — photos only)")
+    print("[FlightWall Proxy] Add OpenSky credentials to proxy-config.txt for higher rate limits")
+print("[FlightWall Proxy] Running — keep this process alive or use start-proxy.command")
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -54,10 +59,17 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/planespotters/"):
             target = "https://api.planespotters.net" + self.path[len("/planespotters"):]
-            req = urllib.request.Request(target)
+            req = urllib.request.Request(target, headers={
+                "User-Agent": _UA,
+                "Referer": "https://www.planespotters.net/",
+                "Accept": "application/json",
+            })
         else:
             target = "https://opensky-network.org" + self.path
-            req = urllib.request.Request(target, headers={"Authorization": f"Basic {TOKEN}"})
+            headers = {"User-Agent": _UA}
+            if TOKEN:
+                headers["Authorization"] = f"Basic {TOKEN}"
+            req = urllib.request.Request(target, headers=headers)
         try:
             with urllib.request.urlopen(req, timeout=15) as resp:
                 data = resp.read()

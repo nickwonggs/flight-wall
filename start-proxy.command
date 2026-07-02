@@ -13,16 +13,13 @@ if [ -f "$PIDFILE" ]; then
 fi
 lsof -ti :8888 | xargs kill -9 2>/dev/null
 
-# Check proxy-config.txt
+# Warn if no credentials, but allow proxy to start (photos work without them)
 if [ ! -f "$SCRIPT_DIR/proxy-config.txt" ]; then
     echo ""
-    echo "  proxy-config.txt not found."
-    echo "  Run setup.sh first, or create proxy-config.txt with:"
-    echo "    Line 1: your OpenSky username"
-    echo "    Line 2: your OpenSky password"
+    echo "  No proxy-config.txt found — starting in anonymous mode."
+    echo "  Aircraft photos will work. For higher OpenSky rate limits,"
+    echo "  run setup.sh to add your OpenSky credentials."
     echo ""
-    read -rp "Press Enter to close..."
-    exit 1
 fi
 
 # Start proxy in background
@@ -37,7 +34,8 @@ if kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
     echo "  In Flight Wall settings (gear icon),"
     echo "  set Proxy URL to:  http://localhost:8888"
     echo ""
-    echo "  You can close this window — proxy keeps running in background."
+    echo "  This enables aircraft photos and (with credentials) authenticated"
+    echo "  OpenSky access. You can close this window — proxy runs in background."
     echo ""
 else
     echo ""

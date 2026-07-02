@@ -69,6 +69,8 @@ When the page loads, your browser will ask:
 
 The grid will fill with flight cards within about 30 seconds. The nearest flight is shown first. Cards animate in and out as aircraft enter or leave your area.
 
+> **Note on aircraft photos:** Photos require the local proxy to be running (Part 3). This is because the photo provider (PlaneSpotters) blocks direct browser requests from locally-opened files. The proxy takes one extra minute to set up and does not require an OpenSky account.
+
 That's it for basic use. The rest of this guide is optional.
 
 ---
@@ -94,9 +96,9 @@ The app will restart polling immediately using your account.
 
 ---
 
-## Part 3 — Proxy setup for authenticated route data (requires Terminal once)
+## Part 3 — Proxy setup for photos and route data (requires Terminal once)
 
-Route origin/destination information and a higher API rate limit require a local proxy. This section uses Terminal — but only for a few copy-paste commands.
+The local proxy is needed for **aircraft photos** (PlaneSpotters blocks direct browser requests) and for route origin/destination data. You do not need an OpenSky account to run the proxy — photos work without one. This section uses Terminal — but only for a few copy-paste commands.
 
 ### Step 1 — Open Terminal
 
